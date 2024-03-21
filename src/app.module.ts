@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './auth/entities/user.entity';
 @Module({
   imports: [
     AuthModule,
@@ -13,9 +14,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
-        database: config.get<string>('DB_NAME'),
+        username: 'postgres',
         port: config.get<number>('DB_PORT'),
-        entities: [],
+        password: config.get<string>('DB_PASSWORD'),
+        entities: [User],
       }),
     }),
   ],
