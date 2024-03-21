@@ -26,5 +26,14 @@ export class AuthService {
     });
     return this.repo.save(createdUser);
   }
-  signin() {}
+  async signin(email: string, password: string) {
+    const [user] = await this.repo.findBy({ email });
+    if (!user) throw new BadRequestException('Does not exist');
+
+    const [salt, storedPassword] = user.password.split('.');
+    const plainToHash = (await scrypt(password, salt, 32)) as Buffer;
+
+    if (plainToHash.toString('hex') === storedPassword) return user;
+    throw new BadRequestException('Please, verify your credentials');
+  }
 }
