@@ -4,6 +4,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './auth/entities/user.entity';
 import { APP_PIPE } from '@nestjs/core';
+import { AuthorModule } from './author/author.module';
+import { Author } from './author/entities/author.entity';
+import { BookModule } from './book/book.module';
+import { Book } from './book/entities/book.entity';
 const cookieSession = require('cookie-session');
 @Module({
   imports: [
@@ -19,9 +23,12 @@ const cookieSession = require('cookie-session');
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         port: config.get<number>('DB_PORT'),
-        entities: [User],
+        entities: [User, Author, Book],
+        synchronize: true,
       }),
     }),
+    AuthorModule,
+    BookModule,
   ],
   providers: [
     {
