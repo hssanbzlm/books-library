@@ -21,6 +21,9 @@ export class CreateBookDto {
   @Type(() => Date)
   @IsDate()
   date: Date;
+  @IsNumber()
+  @Min(1)
+  quantity: number;
   @IsNumber({}, { each: true })
   @ArrayMinSize(1)
   authorIds: number[];

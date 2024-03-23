@@ -21,6 +21,8 @@ export class Book {
   edition: string;
   @Column()
   date: Date;
+  @Column({ nullable: true })
+  quantity: number;
   @ManyToMany(() => Author)
   @JoinTable()
   authors: Author[];

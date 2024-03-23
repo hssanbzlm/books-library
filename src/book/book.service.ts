@@ -59,16 +59,28 @@ export class BookService {
   async borrow({ idBook, idUser, startDate, endDate }: BorrowBookDto) {
     const book = await this.bookRepo.findOne({ where: { id: idBook } });
     const user = await this.userRepo.findOne({ where: { id: idUser } });
-    if (book && user) {
-      const detailBorrow = this.userToBookRepo.create({
-        bookId: idBook,
-        userId: idUser,
-        startDate,
-        endDate,
-      });
-      return this.userToBookRepo.save({ ...detailBorrow, book, user });
-    }
-    throw new NotFoundException('Resources not found');
+    if (book && book.quantity > 0 && user) {
+      await this.bookRepo.manager.transaction(
+        async (transactionalEntityManager) => {
+          const detailBorrow = transactionalEntityManager.create(UserToBook, {
+            bookId: idBook,
+            userId: idUser,
+            startDate,
+            endDate,
+          });
+          await transactionalEntityManager.save(UserToBook, {
+            ...detailBorrow,
+            book,
+            user,
+          });
+          await transactionalEntityManager.update(
+            Book,
+            { id: idBook },
+            { ...book, quantity: book.quantity - 1 },
+          );
+        },
+      );
+    } else throw new NotFoundException('Resources not found');
   }
 
   private async preloadAuthorById(id: number): Promise<Author> {
