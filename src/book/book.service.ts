@@ -15,8 +15,6 @@ export class BookService {
     @InjectRepository(Book) private bookRepo: Repository<Book>,
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Author) private authorRepo: Repository<Author>,
-    @InjectRepository(UserToBook)
-    private userToBookRepo: Repository<UserToBook>,
   ) {}
 
   async create(createBookDto: CreateBookDto) {
@@ -41,7 +39,7 @@ export class BookService {
   }
 
   update(id: number, updateBookDto: UpdateBookDto) {
-    const book = this.bookRepo.findBy({ id });
+    const book = this.bookRepo.findOneBy({ id });
     if (!book) throw new NotFoundException('This book does not exist');
 
     return this.bookRepo
@@ -84,7 +82,7 @@ export class BookService {
   }
 
   private async preloadAuthorById(id: number): Promise<Author> {
-    const [existingAuthor] = await this.authorRepo.findBy({ id });
+    const existingAuthor = await this.authorRepo.findOneBy({ id });
     if (existingAuthor) {
       return existingAuthor;
     }
