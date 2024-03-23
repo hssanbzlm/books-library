@@ -4,8 +4,10 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { UserToBook } from './userToBook';
 
 @Entity()
 export class Book {
@@ -22,4 +24,7 @@ export class Book {
   @ManyToMany(() => Author)
   @JoinTable()
   authors: Author[];
+
+  @OneToMany(() => UserToBook, (userToBook) => userToBook.book)
+  userToBooks: UserToBook[];
 }

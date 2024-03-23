@@ -36,4 +36,8 @@ export class AuthService {
     if (plainToHash.toString('hex') === storedPassword) return user;
     throw new BadRequestException('Please, verify your credentials');
   }
+
+  userList() {
+    return this.repo.find({ relations: { userToBooks: true } });
+  }
 }

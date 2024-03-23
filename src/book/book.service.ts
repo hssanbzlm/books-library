@@ -5,12 +5,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from './entities/book.entity';
 import { Repository } from 'typeorm';
 import { Author } from 'src/author/entities/author.entity';
+import { BorrowBookDto } from './dto/borrow-book.dto';
+import { User } from 'src/auth/entities/user.entity';
+import { UserToBook } from './entities/userToBook';
 
 @Injectable()
 export class BookService {
   constructor(
     @InjectRepository(Book) private bookRepo: Repository<Book>,
+    @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Author) private authorRepo: Repository<Author>,
+    @InjectRepository(UserToBook)
+    private userToBookRepo: Repository<UserToBook>,
   ) {}
 
   async create(createBookDto: CreateBookDto) {
@@ -48,6 +54,21 @@ export class BookService {
 
   remove(id: number) {
     return this.bookRepo.delete({ id });
+  }
+
+  async borrow({ idBook, idUser, startDate, endDate }: BorrowBookDto) {
+    const book = await this.bookRepo.findOne({ where: { id: idBook } });
+    const user = await this.userRepo.findOne({ where: { id: idUser } });
+    if (book && user) {
+      const detailBorrow = this.userToBookRepo.create({
+        bookId: idBook,
+        userId: idUser,
+        startDate,
+        endDate,
+      });
+      return this.userToBookRepo.save({ ...detailBorrow, book, user });
+    }
+    throw new NotFoundException('Resources not found');
   }
 
   private async preloadAuthorById(id: number): Promise<Author> {

@@ -8,6 +8,7 @@ import { AuthorModule } from './author/author.module';
 import { Author } from './author/entities/author.entity';
 import { BookModule } from './book/book.module';
 import { Book } from './book/entities/book.entity';
+import { UserToBook } from './book/entities/userToBook';
 const cookieSession = require('cookie-session');
 @Module({
   imports: [
@@ -23,7 +24,7 @@ const cookieSession = require('cookie-session');
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         port: config.get<number>('DB_PORT'),
-        entities: [User, Author, Book],
+        entities: [User, Author, Book, UserToBook],
         synchronize: true,
       }),
     }),

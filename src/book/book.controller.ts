@@ -10,6 +10,7 @@ import {
 import { BookService } from './book.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { BorrowBookDto } from './dto/borrow-book.dto';
 
 @Controller('book')
 export class BookController {
@@ -38,5 +39,10 @@ export class BookController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.bookService.remove(+id);
+  }
+
+  @Post('borrow')
+  borrowBook(@Body() body: BorrowBookDto) {
+    return this.bookService.borrow(body);
   }
 }

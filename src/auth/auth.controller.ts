@@ -5,6 +5,7 @@ import {
   Post,
   Session,
   UseInterceptors,
+  Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dtos/create-user.dto';
@@ -33,5 +34,9 @@ export class AuthController {
   @Post('/signout')
   async signout(@Session() session: any) {
     session.userId = null;
+  }
+  @Get()
+  usersList() {
+    return this.authService.userList();
   }
 }
