@@ -10,6 +10,8 @@ import { BookModule } from './book/book.module';
 import { Book } from './book/entities/book.entity';
 import { UserToBook } from './book/entities/userToBook';
 import { CurrentUserMiddleware } from './middlewares/current-user/current-user.middleware';
+import { BorrowReminderService } from './tasks/borrow-reminder/borrow-reminder.service';
+import { MailerModule } from '@nestjs-modules/mailer';
 const cookieSession = require('cookie-session');
 @Module({
   imports: [
@@ -30,6 +32,19 @@ const cookieSession = require('cookie-session');
       }),
     }),
     TypeOrmModule.forFeature([User]),
+    MailerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        transport: {
+          service: 'Gmail',
+          tls: { rejectUnauthorized: false },
+          auth: {
+            user: config.get<string>('EMAIL_REMINDER'),
+            pass: config.get<string>('EMAIL_REMINDER_PASSWORD'),
+          },
+        },
+      }),
+    }),
     AuthorModule,
     BookModule,
   ],
@@ -41,6 +56,7 @@ const cookieSession = require('cookie-session');
         whitelist: true,
       }),
     },
+    BorrowReminderService,
   ],
 })
 export class AppModule {
