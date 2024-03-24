@@ -12,10 +12,14 @@ import { UserToBook } from './book/entities/userToBook';
 import { CurrentUserMiddleware } from './middlewares/current-user/current-user.middleware';
 import { BorrowReminderService } from './tasks/borrow-reminder/borrow-reminder.service';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { ScheduleModule } from '@nestjs/schedule';
+import { BookService } from './book/book.service';
 const cookieSession = require('cookie-session');
 @Module({
   imports: [
     AuthModule,
+    AuthorModule,
+    BookModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: `.env.${process.env.NODE_ENV}`,
@@ -31,7 +35,7 @@ const cookieSession = require('cookie-session');
         synchronize: true,
       }),
     }),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Book, Author, UserToBook]),
     MailerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -45,8 +49,7 @@ const cookieSession = require('cookie-session');
         },
       }),
     }),
-    AuthorModule,
-    BookModule,
+    ScheduleModule.forRoot(),
   ],
   providers: [
     {

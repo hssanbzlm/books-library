@@ -12,5 +12,6 @@ import { BorrowReminderService } from 'src/tasks/borrow-reminder/borrow-reminder
   imports: [TypeOrmModule.forFeature([Book, Author, User, UserToBook])],
   controllers: [BookController],
   providers: [BookService, BorrowReminderService],
+  exports: [BookService],
 })
 export class BookModule {}

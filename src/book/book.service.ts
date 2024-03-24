@@ -91,4 +91,26 @@ export class BookService {
     }
     throw new NotFoundException(`Author ${id} not found`);
   }
+
+  async borrowList() {
+    // alternative   where: { endDate: Raw((alias) => `${alias}> NOW()`) },
+    const quaryResult: [] = await this.userRepo
+      .createQueryBuilder('userRepo')
+      .innerJoin('userRepo.userToBooks', 'userToBook')
+      .where('userToBook.endDate > :thisDate', {
+        thisDate: new Date(),
+      })
+      .innerJoinAndSelect('userToBook.book', 'book')
+      .select('userRepo.email', 'email')
+      .addSelect('book.title', 'title')
+      .execute();
+    const booksByEmail = quaryResult.reduce((acc, current: any) => {
+      if (!acc[current.email]) {
+        acc[current.email] = [];
+      }
+      acc[current.email].push(current.title);
+      return acc;
+    }, {});
+    return booksByEmail;
+  }
 }

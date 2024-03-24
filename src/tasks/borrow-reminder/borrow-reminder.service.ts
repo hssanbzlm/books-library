@@ -1,24 +1,33 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { BookService } from 'src/book/book.service';
 
 @Injectable()
 export class BorrowReminderService {
   constructor(
     private readonly mailerService: MailerService,
     private configService: ConfigService,
+    private bookService: BookService,
   ) {}
-
-  async sendReminder(to: string, content: string) {
-    try {
-      await this.mailerService.sendMail({
-        to,
-        from: this.configService.get<string>('EMAIL_REMINDER'),
-        text: content,
-        subject: 'Borrow book reminder',
-      });
-    } catch (err) {
-      console.log('err', err);
+  @Cron(CronExpression.EVERY_DAY_AT_11AM, { name: 'send reminder' })
+  async sendReminder() {
+    const data = await this.bookService.borrowList();
+    for (const [key, value] of Object.entries(data)) {
+      const email = key;
+      const books = value as string[];
+      const content = `We are sending you this email to remind you that you have to bring back: ${books.join(' , ')}`;
+      try {
+        await this.mailerService.sendMail({
+          to: email,
+          from: this.configService.get<string>('EMAIL_REMINDER'),
+          text: content,
+          subject: 'Borrow book reminder',
+        });
+      } catch (err) {
+        console.log('err', err);
+      }
     }
   }
 }
