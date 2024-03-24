@@ -54,15 +54,18 @@ export class BookService {
     return this.bookRepo.delete({ id });
   }
 
-  async borrow({ idBook, idUser, startDate, endDate }: BorrowBookDto) {
+  async borrow(
+    { idBook, startDate, endDate }: BorrowBookDto,
+    currentUser: User,
+  ) {
     const book = await this.bookRepo.findOne({ where: { id: idBook } });
-    const user = await this.userRepo.findOne({ where: { id: idUser } });
+    const user = await this.userRepo.findOne({ where: { id: currentUser.id } });
     if (book && book.quantity > 0 && user) {
       await this.bookRepo.manager.transaction(
         async (transactionalEntityManager) => {
           const detailBorrow = transactionalEntityManager.create(UserToBook, {
             bookId: idBook,
-            userId: idUser,
+            userId: currentUser.id,
             startDate,
             endDate,
           });

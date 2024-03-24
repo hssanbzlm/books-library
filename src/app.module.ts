@@ -9,6 +9,7 @@ import { Author } from './author/entities/author.entity';
 import { BookModule } from './book/book.module';
 import { Book } from './book/entities/book.entity';
 import { UserToBook } from './book/entities/userToBook';
+import { CurrentUserMiddleware } from './middlewares/current-user/current-user.middleware';
 const cookieSession = require('cookie-session');
 @Module({
   imports: [
@@ -28,6 +29,7 @@ const cookieSession = require('cookie-session');
         synchronize: true,
       }),
     }),
+    TypeOrmModule.forFeature([User]),
     AuthorModule,
     BookModule,
   ],
@@ -47,5 +49,6 @@ export class AppModule {
     consumer
       .apply(cookieSession({ keys: [this.configService.get('COOKIE_KEY')] }))
       .forRoutes('*');
+    consumer.apply(CurrentUserMiddleware).forRoutes('book');
   }
 }

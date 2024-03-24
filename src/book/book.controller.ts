@@ -6,11 +6,15 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { BookService } from './book.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { BorrowBookDto } from './dto/borrow-book.dto';
+import { currentUser } from '../decorators/current-user/current-user.decorator';
+import { User } from 'src/auth/entities/user.entity';
+import { AuthGuard } from 'src/auth-guard/auth-guard.guard';
 
 @Controller('book')
 export class BookController {
@@ -41,8 +45,9 @@ export class BookController {
     return this.bookService.remove(+id);
   }
 
+  @UseGuards(AuthGuard)
   @Post('borrow')
-  borrowBook(@Body() body: BorrowBookDto) {
-    return this.bookService.borrow(body);
+  borrowBook(@Body() body: BorrowBookDto, @currentUser() currentUser: User) {
+    return this.bookService.borrow(body, currentUser);
   }
 }

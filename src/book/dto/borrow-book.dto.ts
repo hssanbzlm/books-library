@@ -4,8 +4,6 @@ import { IsDate, IsNumber } from 'class-validator';
 export class BorrowBookDto {
   @IsNumber()
   idBook: number;
-  @IsNumber()
-  idUser: number;
   @Type(() => Date)
   @IsDate()
   startDate: Date;
