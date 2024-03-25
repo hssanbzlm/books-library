@@ -14,7 +14,7 @@ import { UpdateBookDto } from './dto/update-book.dto';
 import { BorrowBookDto } from './dto/borrow-book.dto';
 import { currentUser } from '../decorators/current-user/current-user.decorator';
 import { User } from 'src/auth/entities/user.entity';
-import { AuthGuard } from 'src/auth-guard/auth-guard.guard';
+import { AuthGuard } from '../guards/auth-guard.guard';
 
 @Controller('book')
 export class BookController {
