@@ -6,10 +6,10 @@ import { Repository } from 'typeorm';
 @Injectable()
 export class CurrentUserMiddleware implements NestMiddleware {
   constructor(@InjectRepository(User) private userRepo: Repository<User>) {}
-  use(req: any, res: any, next: () => void) {
+  async use(req: any, res: any, next: () => void) {
     const userId = req.session.userId;
     if (userId) {
-      const user = this.userRepo.findOneBy({ id: userId });
+      const user = await this.userRepo.findOneBy({ id: userId });
       req.currentUser = user;
     }
     next();
