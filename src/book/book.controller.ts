@@ -16,10 +16,15 @@ import { currentUser } from '../decorators/current-user/current-user.decorator';
 import { User } from 'src/auth/entities/user.entity';
 import { AuthGuard } from '../guards/auth-guard.guard';
 import { AdminGuard } from 'src/guards/admin.guard';
+import { BorrowBookBackDto } from './dto/broow-book-back.dto';
+import { UserToBookService } from './user-to-book/user-to-book.service';
 
 @Controller('book')
 export class BookController {
-  constructor(private readonly bookService: BookService) {}
+  constructor(
+    private readonly bookService: BookService,
+    private readonly userToBookService: UserToBookService,
+  ) {}
 
   @UseGuards(AdminGuard)
   @Post()
@@ -52,6 +57,15 @@ export class BookController {
   @UseGuards(AuthGuard)
   @Post('borrow')
   borrowBook(@Body() body: BorrowBookDto, @currentUser() currentUser: User) {
-    return this.bookService.borrow(body, currentUser);
+    return this.userToBookService.borrow(body, currentUser);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('borrow-back')
+  borrowBookBack(
+    @Body() body: BorrowBookBackDto,
+    @currentUser() currentUser: User,
+  ) {
+    return this.userToBookService.borrowBack(body.idBook, currentUser.id);
   }
 }

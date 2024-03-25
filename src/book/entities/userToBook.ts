@@ -18,6 +18,9 @@ export class UserToBook {
   @Column()
   endDate: Date;
 
+  @Column({ default: false })
+  isBack: boolean;
+
   @ManyToOne(() => User, (user) => user.userToBooks)
   user: User;
 

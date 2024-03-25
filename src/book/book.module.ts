@@ -7,11 +7,12 @@ import { Author } from 'src/author/entities/author.entity';
 import { UserToBook } from './entities/userToBook';
 import { User } from 'src/auth/entities/user.entity';
 import { BorrowReminderService } from 'src/tasks/borrow-reminder/borrow-reminder.service';
+import { UserToBookService } from './user-to-book/user-to-book.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Book, Author, User, UserToBook])],
   controllers: [BookController],
-  providers: [BookService, BorrowReminderService],
+  providers: [BookService, BorrowReminderService, UserToBookService],
   exports: [BookService],
 })
 export class BookModule {}

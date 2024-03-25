@@ -5,10 +5,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from './entities/book.entity';
 import { Repository } from 'typeorm';
 import { Author } from 'src/author/entities/author.entity';
-import { BorrowBookDto } from './dto/borrow-book.dto';
 import { User } from 'src/auth/entities/user.entity';
-import { UserToBook } from './entities/userToBook';
 import * as moment from 'moment';
+import { UserToBookService } from './user-to-book/user-to-book.service';
 
 @Injectable()
 export class BookService {
@@ -16,6 +15,7 @@ export class BookService {
     @InjectRepository(Book) private bookRepo: Repository<Book>,
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Author) private authorRepo: Repository<Author>,
+    private userToBookService: UserToBookService,
   ) {}
 
   async create(createBookDto: CreateBookDto) {
@@ -53,36 +53,6 @@ export class BookService {
 
   remove(id: number) {
     return this.bookRepo.delete({ id });
-  }
-
-  async borrow(
-    { idBook, startDate, endDate }: BorrowBookDto,
-    currentUser: User,
-  ) {
-    const book = await this.bookRepo.findOne({ where: { id: idBook } });
-    const user = await this.userRepo.findOne({ where: { id: currentUser.id } });
-    if (book && book.quantity > 0 && user) {
-      await this.bookRepo.manager.transaction(
-        async (transactionalEntityManager) => {
-          const detailBorrow = transactionalEntityManager.create(UserToBook, {
-            bookId: idBook,
-            userId: currentUser.id,
-            startDate,
-            endDate,
-          });
-          await transactionalEntityManager.save(UserToBook, {
-            ...detailBorrow,
-            book,
-            user,
-          });
-          await transactionalEntityManager.update(
-            Book,
-            { id: idBook },
-            { ...book, quantity: book.quantity - 1 },
-          );
-        },
-      );
-    } else throw new NotFoundException('Resources not found');
   }
 
   private async preloadAuthorById(id: number): Promise<Author> {
