@@ -8,6 +8,7 @@ import { Author } from 'src/author/entities/author.entity';
 import { BorrowBookDto } from './dto/borrow-book.dto';
 import { User } from 'src/auth/entities/user.entity';
 import { UserToBook } from './entities/userToBook';
+import * as moment from 'moment';
 
 @Injectable()
 export class BookService {
@@ -93,18 +94,23 @@ export class BookService {
   }
 
   async borrowList() {
-    // alternative   where: { endDate: Raw((alias) => `${alias}> NOW()`) },
-    const quaryResult: [] = await this.userRepo
+    const nextDay = new Date();
+    nextDay.setDate(nextDay.getDate() + 1);
+    const queryResult: [] = await this.userRepo
       .createQueryBuilder('userRepo')
       .innerJoin('userRepo.userToBooks', 'userToBook')
-      .where('userToBook.endDate > :thisDate', {
-        thisDate: new Date(),
+      .where('userToBook.endDate = :thisDate', {
+        thisDate: moment(nextDay).format('MM/DD/YYYY'),
       })
       .innerJoinAndSelect('userToBook.book', 'book')
       .select('userRepo.email', 'email')
       .addSelect('book.title', 'title')
       .execute();
-    const booksByEmail = quaryResult.reduce((acc, current: any) => {
+
+    return this.groupBooks(queryResult);
+  }
+  private groupBooks(borrowList: { email: string; title: string }[]) {
+    const booksByEmail = borrowList.reduce((acc, current) => {
       if (!acc[current.email]) {
         acc[current.email] = [];
       }
