@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { BookService } from './book.service';
 import { CreateBookDto } from './dto/create-book.dto';
@@ -18,6 +19,7 @@ import { AuthGuard } from '../guards/auth-guard.guard';
 import { AdminGuard } from 'src/guards/admin.guard';
 import { BorrowBookBackDto } from './dto/broow-book-back.dto';
 import { UserToBookService } from './user-to-book/user-to-book.service';
+import { QueryBookDto } from './dto/query-book.dto';
 
 @Controller('book')
 export class BookController {
@@ -32,6 +34,10 @@ export class BookController {
     return this.bookService.create(createBookDto);
   }
 
+  @Get('filter')
+  filterBooks(@Query() query: QueryBookDto) {
+    return this.bookService.filter(query);
+  }
   @Get()
   findAll() {
     return this.bookService.findAll();

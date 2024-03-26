@@ -3,11 +3,12 @@ import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from './entities/book.entity';
-import { Repository } from 'typeorm';
+import { Repository, Like } from 'typeorm';
 import { Author } from 'src/author/entities/author.entity';
 import { User } from 'src/auth/entities/user.entity';
 import * as moment from 'moment';
 import { UserToBookService } from './user-to-book/user-to-book.service';
+import { QueryBookDto } from './dto/query-book.dto';
 
 @Injectable()
 export class BookService {
@@ -78,6 +79,13 @@ export class BookService {
       .execute();
 
     return this.groupBooks(queryResult);
+  }
+
+  filter({ title, edition }: QueryBookDto) {
+    return this.bookRepo.findBy({
+      title: Like(`%${title}%`),
+      edition: Like(`%${edition}%`),
+    });
   }
   private groupBooks(borrowList: { email: string; title: string }[]) {
     const booksByEmail = borrowList.reduce((acc, current) => {
