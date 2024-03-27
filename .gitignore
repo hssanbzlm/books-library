@@ -13,6 +13,11 @@ pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+borrow-system.txt
+
+# private asset
+public/img
+
 
 # OS
 .DS_Store
