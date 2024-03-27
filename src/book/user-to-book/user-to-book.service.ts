@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import { Book } from '../entities/book.entity';
 import { BorrowBookDto } from '../dto/borrow-book.dto';
 import { User } from 'src/auth/entities/user.entity';
+import * as moment from 'moment';
 
 @Injectable()
 export class UserToBookService {
@@ -84,5 +85,31 @@ export class UserToBookService {
         },
       );
     } else throw new NotFoundException('Resources not found');
+  }
+  async borrowList() {
+    const nextDay = new Date();
+    nextDay.setDate(nextDay.getDate() + 1);
+    const queryResult: [] = await this.userRepository
+      .createQueryBuilder('userRepo')
+      .innerJoin('userRepo.userToBooks', 'userToBook')
+      .where('userToBook.endDate = :thisDate', {
+        thisDate: moment(nextDay).format('MM/DD/YYYY'),
+      })
+      .innerJoinAndSelect('userToBook.book', 'book')
+      .select('userRepo.email', 'email')
+      .addSelect('book.title', 'title')
+      .execute();
+
+    return this.groupBooks(queryResult);
+  }
+  private groupBooks(borrowList: { email: string; title: string }[]) {
+    const booksByEmail = borrowList.reduce((acc, current) => {
+      if (!acc[current.email]) {
+        acc[current.email] = [];
+      }
+      acc[current.email].push(current.title);
+      return acc;
+    }, {});
+    return booksByEmail;
   }
 }
