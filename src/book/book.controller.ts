@@ -8,6 +8,8 @@ import {
   Delete,
   UseGuards,
   Query,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { BookService } from './book.service';
 import { CreateBookDto } from './dto/create-book.dto';
@@ -20,6 +22,8 @@ import { AdminGuard } from 'src/guards/admin.guard';
 import { BorrowBookBackDto } from './dto/broow-book-back.dto';
 import { UserToBookService } from './user-to-book/user-to-book.service';
 import { QueryBookDto } from './dto/query-book.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 @Controller('book')
 export class BookController {
@@ -29,9 +33,22 @@ export class BookController {
   ) {}
 
   @UseGuards(AdminGuard)
+  @UseInterceptors(
+    FileInterceptor('cover', {
+      storage: diskStorage({
+        destination: 'public/img',
+        filename: (req, file, cb) => {
+          cb(null, file.originalname);
+        },
+      }),
+    }),
+  )
   @Post()
-  create(@Body() createBookDto: CreateBookDto) {
-    return this.bookService.create(createBookDto);
+  create(
+    @UploadedFile() cover: Express.Multer.File,
+    @Body() createBookDto: CreateBookDto,
+  ) {
+    return this.bookService.create(createBookDto, cover.path);
   }
 
   @Get('filter')

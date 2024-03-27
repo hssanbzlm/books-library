@@ -6,12 +6,14 @@ import {
   IsNotEmpty,
   Min,
   ArrayMinSize,
+  IsArray,
 } from 'class-validator';
 
 export class CreateBookDto {
   @IsNotEmpty()
   @IsString()
   title: string;
+  @Type(() => Number)
   @Min(50)
   @IsNumber()
   numberOfPages: number;
@@ -21,9 +23,11 @@ export class CreateBookDto {
   @Type(() => Date)
   @IsDate()
   date: Date;
+  @Type(() => Number)
   @IsNumber()
   @Min(1)
   quantity: number;
+  @Type(() => Number)
   @IsNumber({}, { each: true })
   @ArrayMinSize(1)
   authorIds: number[];

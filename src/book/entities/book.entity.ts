@@ -23,6 +23,8 @@ export class Book {
   date: Date;
   @Column({ nullable: true })
   quantity: number;
+  @Column({ nullable: true })
+  coverPath: string;
   @ManyToMany(() => Author)
   @JoinTable()
   authors: Author[];

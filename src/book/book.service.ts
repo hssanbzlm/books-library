@@ -19,11 +19,11 @@ export class BookService {
     private userToBookService: UserToBookService,
   ) {}
 
-  async create(createBookDto: CreateBookDto) {
+  async create(createBookDto: CreateBookDto, coverPath: string) {
     const authors = await Promise.all(
       createBookDto.authorIds.map((id) => this.preloadAuthorById(id)),
     );
-    const book = this.bookRepo.create({ ...createBookDto, authors });
+    const book = this.bookRepo.create({ ...createBookDto, coverPath, authors });
     return this.bookRepo.save(book);
   }
 
