@@ -33,22 +33,13 @@ export class BookController {
   ) {}
 
   @UseGuards(AdminGuard)
-  @UseInterceptors(
-    FileInterceptor('cover', {
-      storage: diskStorage({
-        destination: 'public/img',
-        filename: (req, file, cb) => {
-          cb(null, file.originalname);
-        },
-      }),
-    }),
-  )
+  @UseInterceptors(FileInterceptor('cover'))
   @Post()
   create(
     @UploadedFile() cover: Express.Multer.File,
     @Body() createBookDto: CreateBookDto,
   ) {
-    return this.bookService.create(createBookDto, cover.path);
+    return this.bookService.create(createBookDto, cover);
   }
 
   @Get('filter')

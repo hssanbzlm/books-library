@@ -8,9 +8,13 @@ import { UserToBook } from './entities/userToBook';
 import { User } from 'src/auth/entities/user.entity';
 import { BorrowReminderService } from 'src/tasks/borrow-reminder/borrow-reminder.service';
 import { UserToBookService } from './user-to-book/user-to-book.service';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Book, Author, User, UserToBook])],
+  imports: [
+    TypeOrmModule.forFeature([Book, Author, User, UserToBook]),
+    CloudinaryModule,
+  ],
   controllers: [BookController],
   providers: [BookService, BorrowReminderService, UserToBookService],
   exports: [BookService],

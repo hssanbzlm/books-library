@@ -9,6 +9,7 @@ import { User } from 'src/auth/entities/user.entity';
 import * as moment from 'moment';
 import { UserToBookService } from './user-to-book/user-to-book.service';
 import { QueryBookDto } from './dto/query-book.dto';
+import { CloudinaryService } from 'src/cloudinary/service/cloudinary/cloudinary.service';
 
 @Injectable()
 export class BookService {
@@ -17,13 +18,22 @@ export class BookService {
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Author) private authorRepo: Repository<Author>,
     private userToBookService: UserToBookService,
+    private cloudinaryService: CloudinaryService,
   ) {}
 
-  async create(createBookDto: CreateBookDto, coverPath: string) {
+  async create(createBookDto: CreateBookDto, cover: Express.Multer.File) {
+    let uploadedFile = null;
+    if (cover) {
+      uploadedFile = await this.cloudinaryService.uploadFile(cover);
+    }
     const authors = await Promise.all(
       createBookDto.authorIds.map((id) => this.preloadAuthorById(id)),
     );
-    const book = this.bookRepo.create({ ...createBookDto, coverPath, authors });
+    const book = this.bookRepo.create({
+      ...createBookDto,
+      coverPath: uploadedFile && uploadedFile.secure_url,
+      authors,
+    });
     return this.bookRepo.save(book);
   }
 
