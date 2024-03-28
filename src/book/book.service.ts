@@ -45,16 +45,32 @@ export class BookService {
     return book;
   }
 
-  update(id: number, updateBookDto: UpdateBookDto) {
-    const book = this.bookRepo.findOneBy({ id });
+  async update(
+    id: number,
+    updateBookDto: UpdateBookDto,
+    cover: Express.Multer.File,
+  ) {
+    const book = await this.bookRepo.findOneBy({ id });
     if (!book) throw new NotFoundException('This book does not exist');
+    let uploadedFile = null;
+    let oldFile = null;
+    if (cover) {
+      oldFile = book.coverPath;
+      uploadedFile = await this.cloudinaryService.uploadFile(cover);
+    }
 
-    return this.bookRepo
+    const updatedBook = this.bookRepo
       .createQueryBuilder()
       .update(updateBookDto)
-      .set(updateBookDto)
+      .set({
+        ...updateBookDto,
+        coverPath: uploadedFile && uploadedFile.secure_url,
+      })
       .where('id= :id', { id })
       .execute();
+
+    if (oldFile) await this.cloudinaryService.removeFile(oldFile);
+    return updatedBook;
   }
 
   remove(id: number) {

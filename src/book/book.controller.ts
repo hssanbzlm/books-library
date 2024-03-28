@@ -57,12 +57,14 @@ export class BookController {
   }
 
   @UseGuards(AdminGuard)
+  @UseInterceptors(FileInterceptor('cover'))
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateBookDto: UpdateBookDto,
+    @UploadedFile() cover: Express.Multer.File,
   ) {
-    return this.bookService.update(id, updateBookDto);
+    return this.bookService.update(id, updateBookDto, cover);
   }
 
   @UseGuards(AdminGuard)

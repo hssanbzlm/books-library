@@ -11,4 +11,12 @@ export class CloudinaryService {
       folder: 'book-store',
     });
   }
+
+  removeFile(imgUrl: string) {
+    const imageId = imgUrl.slice(
+      imgUrl.indexOf('book-store'),
+      imgUrl.lastIndexOf('.'),
+    );
+    return cloudinary.uploader.destroy(imageId);
+  }
 }
