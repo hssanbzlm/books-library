@@ -59,7 +59,6 @@ const cookieSession = require('cookie-session');
         whitelist: true,
       }),
     },
-    BorrowReminderService,
   ],
 })
 export class AppModule {

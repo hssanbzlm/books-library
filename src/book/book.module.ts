@@ -17,6 +17,6 @@ import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
   ],
   controllers: [BookController],
   providers: [BookService, BorrowReminderService, UserToBookService],
-  exports: [BookService],
+  exports: [BookService, UserToBookService],
 })
 export class BookModule {}
