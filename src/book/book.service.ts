@@ -5,8 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from './entities/book.entity';
 import { Repository, Like } from 'typeorm';
 import { Author } from 'src/author/entities/author.entity';
-import { User } from 'src/auth/entities/user.entity';
-import { UserToBookService } from './user-to-book/user-to-book.service';
 import { QueryBookDto } from './dto/query-book.dto';
 import { CloudinaryService } from 'src/cloudinary/service/cloudinary/cloudinary.service';
 
@@ -14,9 +12,7 @@ import { CloudinaryService } from 'src/cloudinary/service/cloudinary/cloudinary.
 export class BookService {
   constructor(
     @InjectRepository(Book) private bookRepo: Repository<Book>,
-    @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Author) private authorRepo: Repository<Author>,
-    private userToBookService: UserToBookService,
     private cloudinaryService: CloudinaryService,
   ) {}
 
