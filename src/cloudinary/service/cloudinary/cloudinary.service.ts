@@ -17,6 +17,6 @@ export class CloudinaryService {
       imgUrl.indexOf('book-store'),
       imgUrl.lastIndexOf('.'),
     );
-    return cloudinary.uploader.destroy(imageId);
+    return cloudinary.uploader.destroy(imageId, { invalidate: true });
   }
 }
