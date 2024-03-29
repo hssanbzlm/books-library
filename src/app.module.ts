@@ -4,8 +4,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './auth/entities/user.entity';
 import { APP_PIPE } from '@nestjs/core';
-import { AuthorModule } from './author/author.module';
-import { Author } from './author/entities/author.entity';
 import { BookModule } from './book/book.module';
 import { Book } from './book/entities/book.entity';
 import { UserToBook } from './book/entities/userToBook';
@@ -18,7 +16,6 @@ const cookieSession = require('cookie-session');
 @Module({
   imports: [
     AuthModule,
-    AuthorModule,
     BookModule,
     ConfigModule.forRoot({
       isGlobal: true,
@@ -31,11 +28,11 @@ const cookieSession = require('cookie-session');
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         port: config.get<number>('DB_PORT'),
-        entities: [User, Author, Book, UserToBook],
+        entities: [User, Book, UserToBook],
         synchronize: true,
       }),
     }),
-    TypeOrmModule.forFeature([User, Book, Author, UserToBook]),
+    TypeOrmModule.forFeature([User, Book, UserToBook]),
     MailerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({

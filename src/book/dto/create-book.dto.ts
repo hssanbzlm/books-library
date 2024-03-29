@@ -31,5 +31,5 @@ export class CreateBookDto {
   @Type(() => Number)
   @IsNumber({}, { each: true })
   @ArrayMinSize(1)
-  authorIds: number[];
+  authors: string[];
 }

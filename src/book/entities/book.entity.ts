@@ -1,4 +1,3 @@
-import { Author } from 'src/author/entities/author.entity';
 import {
   Column,
   Entity,
@@ -25,9 +24,8 @@ export class Book {
   quantity: number;
   @Column({ nullable: true })
   coverPath: string;
-  @ManyToMany(() => Author)
-  @JoinTable()
-  authors: Author[];
+  @Column('text', { array: true })
+  authors: string[];
 
   @OneToMany(() => UserToBook, (userToBook) => userToBook.book)
   userToBooks: UserToBook[];
