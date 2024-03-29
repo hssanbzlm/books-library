@@ -20,13 +20,13 @@ export class BookService {
     let uploadedFile = null;
     if (cover) {
       uploadedFile = await this.cloudinaryService.uploadFile(cover);
+      createBookDto.coverPath = uploadedFile.secure_url;
     }
     const authors = await Promise.all(
       createBookDto.authorIds.map((id) => this.preloadAuthorById(id)),
     );
     const book = this.bookRepo.create({
       ...createBookDto,
-      coverPath: uploadedFile && uploadedFile.secure_url,
       authors,
     });
     return this.bookRepo.save(book);
@@ -57,6 +57,7 @@ export class BookService {
     if (cover) {
       oldFile = book.coverPath;
       uploadedFile = await this.cloudinaryService.uploadFile(cover);
+      updateBookDto.coverPath = uploadedFile.secure_url;
     }
 
     const updatedBook = this.bookRepo
@@ -64,7 +65,6 @@ export class BookService {
       .update(updateBookDto)
       .set({
         ...updateBookDto,
-        coverPath: uploadedFile && uploadedFile.secure_url,
       })
       .where('id= :id', { id })
       .execute();

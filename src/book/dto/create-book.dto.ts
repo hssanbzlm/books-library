@@ -27,6 +27,7 @@ export class CreateBookDto {
   @IsNumber()
   @Min(1)
   quantity: number;
+  coverPath: string;
   @Type(() => Number)
   @IsNumber({}, { each: true })
   @ArrayMinSize(1)
