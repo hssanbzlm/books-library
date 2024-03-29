@@ -28,8 +28,8 @@ export class CreateBookDto {
   @Min(1)
   quantity: number;
   coverPath: string;
-  @Type(() => Number)
-  @IsNumber({}, { each: true })
+  @Type(() => String)
+  @IsString({ each: true })
   @ArrayMinSize(1)
   authors: string[];
 }

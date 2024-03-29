@@ -20,7 +20,7 @@ export class Book {
   edition: string;
   @Column()
   date: Date;
-  @Column({ nullable: true })
+  @Column()
   quantity: number;
   @Column({ nullable: true })
   coverPath: string;
