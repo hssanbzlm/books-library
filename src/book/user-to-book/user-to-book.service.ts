@@ -4,7 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserToBook } from '../entities/userToBook';
+import {
+  UserToBook,
+  status as borrowStatus,
+  statusState,
+} from '../entities/userToBook';
 import { Repository } from 'typeorm';
 import { Book } from '../entities/book.entity';
 import { BorrowBookDto } from '../dto/borrow-book.dto';
@@ -21,34 +25,51 @@ export class UserToBookService {
   ) {}
 
   async isBorrowed(userId: number, bookId: number) {
-    const book = await this.userToBookRepo.findOneBy({
-      userId,
-      bookId,
-      isBack: false,
-    });
+    const book = this.userToBookRepo
+      .createQueryBuilder('usertobook')
+      .where('usertobook.userId = :userId', { userId })
+      .andWhere('usertobook.bookId = :bookId', { bookId })
+      .andWhere('status IN (:...status)', {
+        status: [
+          borrowStatus.Pending,
+          borrowStatus.Accepted,
+          borrowStatus.Overdue,
+          borrowStatus.CheckedOut,
+        ],
+      })
+      .getOne();
     return book;
   }
 
-  async borrowBack(bookId: number, userId: number) {
-    const userToBook = await this.isBorrowed(userId, bookId);
-    if (!userToBook || userToBook.isBack) {
+  async updateBorrowStatus(borrowId: number, status: statusState) {
+    const userToBook = await this.userToBookRepo.findOneBy({
+      userToBookId: borrowId,
+    });
+    if (!userToBook) {
       throw new NotFoundException('check details');
     }
-    await this.bookReposistory.manager.transaction(
-      async (transactionalEntityManager) => {
-        await transactionalEntityManager.update(
-          UserToBook,
-          { userToBookId: userToBook.userToBookId },
-          { ...userToBook, isBack: true },
-        );
-        await transactionalEntityManager.increment(
-          Book,
-          { id: bookId },
-          'quantity',
-          1,
-        );
-      },
-    );
+    if (userToBook.status != status) {
+      await this.bookReposistory.manager.transaction(
+        async (transactionalEntityManager) => {
+          await transactionalEntityManager.update(
+            UserToBook,
+            { userToBookId: userToBook.userToBookId },
+            { ...userToBook, status },
+          );
+          if (
+            status == borrowStatus.Damaged ||
+            status == borrowStatus.Returned ||
+            status == borrowStatus.Refused
+          )
+            await transactionalEntityManager.increment(
+              Book,
+              { id: userToBook.bookId },
+              'quantity',
+              1,
+            );
+        },
+      );
+    } else return 'same status';
   }
 
   async borrow(
@@ -57,7 +78,9 @@ export class UserToBookService {
   ) {
     const isBorrowed = await this.isBorrowed(currentUser.id, idBook);
     if (isBorrowed) {
-      throw new BadRequestException('You can not borrow the same book ');
+      throw new BadRequestException(
+        `This book is already in ${isBorrowed.status} state`,
+      );
     }
     const book = await this.bookReposistory.findOne({ where: { id: idBook } });
     const user = await this.userRepository.findOne({
@@ -71,6 +94,7 @@ export class UserToBookService {
             userId: currentUser.id,
             startDate,
             endDate,
+            status: borrowStatus.Pending,
           });
           await transactionalEntityManager.save(UserToBook, {
             ...detailBorrow,

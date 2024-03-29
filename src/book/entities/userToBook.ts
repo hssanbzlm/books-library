@@ -1,7 +1,25 @@
 import { User } from 'src/auth/entities/user.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Book } from './book.entity';
-
+export type statusState =
+  | 'Pending'
+  | 'Checked-out'
+  | 'Refused'
+  | 'Accepted'
+  | 'Damaged'
+  | 'Lost'
+  | 'Returned'
+  | 'Overdue';
+export enum status {
+  Pending = 'Pending',
+  CheckedOut = 'Checked-out',
+  Refused = 'Refused',
+  Accepted = 'Accepted',
+  Damaged = 'Damaged',
+  Lost = 'Lost',
+  Returned = 'Returned',
+  Overdue = 'Overdue',
+}
 @Entity()
 export class UserToBook {
   @PrimaryGeneratedColumn()
@@ -18,8 +36,8 @@ export class UserToBook {
   @Column()
   endDate: Date;
 
-  @Column({ default: false })
-  isBack: boolean;
+  @Column({ default: 'Pending' })
+  status: statusState;
 
   @ManyToOne(() => User, (user) => user.userToBooks)
   user: User;

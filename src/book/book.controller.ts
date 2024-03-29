@@ -20,7 +20,7 @@ import { currentUser } from '../decorators/current-user/current-user.decorator';
 import { User } from 'src/auth/entities/user.entity';
 import { AuthGuard } from '../guards/auth-guard.guard';
 import { AdminGuard } from 'src/guards/admin.guard';
-import { BorrowBookBackDto } from './dto/broow-book-back.dto';
+import { UpdateBorrowBookDto } from './dto/update-borrow-book.dto';
 import { UserToBookService } from './user-to-book/user-to-book.service';
 import { QueryBookDto } from './dto/query-book.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -57,6 +57,15 @@ export class BookController {
   }
 
   @UseGuards(AdminGuard)
+  @Patch('borrow-status')
+  updateBorrowStatus(@Body() body: UpdateBorrowBookDto) {
+    return this.userToBookService.updateBorrowStatus(
+      body.borrowId,
+      body.status,
+    );
+  }
+
+  @UseGuards(AdminGuard)
   @UseInterceptors(FileInterceptor('cover'))
   @Patch(':id')
   update(
@@ -77,14 +86,5 @@ export class BookController {
   @Post('borrow')
   borrowBook(@Body() body: BorrowBookDto, @currentUser() currentUser: User) {
     return this.userToBookService.borrow(body, currentUser);
-  }
-
-  @UseGuards(AuthGuard)
-  @Post('borrow-back')
-  borrowBookBack(
-    @Body() body: BorrowBookBackDto,
-    @currentUser() currentUser: User,
-  ) {
-    return this.userToBookService.borrowBack(body.idBook, currentUser.id);
   }
 }
