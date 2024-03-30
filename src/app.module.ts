@@ -64,6 +64,6 @@ export class AppModule {
     consumer
       .apply(cookieSession({ keys: [this.configService.get('COOKIE_KEY')] }))
       .forRoutes('*');
-    consumer.apply(CurrentUserMiddleware).forRoutes('book');
+    consumer.apply(CurrentUserMiddleware).forRoutes('book', 'user-to-book');
   }
 }

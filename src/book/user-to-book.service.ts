@@ -8,10 +8,10 @@ import {
   UserToBook,
   status as borrowStatus,
   statusState,
-} from '../entities/userToBook';
+} from './entities/userToBook';
 import { Repository } from 'typeorm';
-import { Book } from '../entities/book.entity';
-import { BorrowBookDto } from '../dto/borrow-book.dto';
+import { Book } from './entities/book.entity';
+import { BorrowBookDto } from './dto/borrow-book.dto';
 import { User } from 'src/auth/entities/user.entity';
 import * as moment from 'moment';
 
@@ -135,5 +135,9 @@ export class UserToBookService {
       return acc;
     }, {});
     return booksByEmail;
+  }
+
+  getBorrowList() {
+    return this.userToBookRepo.find();
   }
 }

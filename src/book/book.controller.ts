@@ -15,22 +15,18 @@ import {
 import { BookService } from './book.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
-import { BorrowBookDto } from './dto/borrow-book.dto';
-import { currentUser } from '../decorators/current-user/current-user.decorator';
-import { User } from 'src/auth/entities/user.entity';
-import { AuthGuard } from '../guards/auth-guard.guard';
 import { AdminGuard } from 'src/guards/admin.guard';
-import { UpdateBorrowBookDto } from './dto/update-borrow-book.dto';
-import { UserToBookService } from './user-to-book/user-to-book.service';
 import { QueryBookDto } from './dto/query-book.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('book')
 export class BookController {
-  constructor(
-    private readonly bookService: BookService,
-    private readonly userToBookService: UserToBookService,
-  ) {}
+  constructor(private readonly bookService: BookService) {}
+
+  @Get()
+  findAll() {
+    return this.bookService.findAll();
+  }
 
   @UseGuards(AdminGuard)
   @UseInterceptors(FileInterceptor('cover'))
@@ -46,23 +42,10 @@ export class BookController {
   filterBooks(@Query() query: QueryBookDto) {
     return this.bookService.filter(query);
   }
-  @Get()
-  findAll() {
-    return this.bookService.findAll();
-  }
 
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.bookService.findOne(id);
-  }
-
-  @UseGuards(AdminGuard)
-  @Patch('borrow-status')
-  updateBorrowStatus(@Body() body: UpdateBorrowBookDto) {
-    return this.userToBookService.updateBorrowStatus(
-      body.borrowId,
-      body.status,
-    );
   }
 
   @UseGuards(AdminGuard)
@@ -80,11 +63,5 @@ export class BookController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.bookService.remove(id);
-  }
-
-  @UseGuards(AuthGuard)
-  @Post('borrow')
-  borrowBook(@Body() body: BorrowBookDto, @currentUser() currentUser: User) {
-    return this.userToBookService.borrow(body, currentUser);
   }
 }

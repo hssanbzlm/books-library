@@ -2,7 +2,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { UserToBookService } from 'src/book/user-to-book/user-to-book.service';
+import { UserToBookService } from 'src/book/user-to-book.service';
 
 @Injectable()
 export class BorrowReminderService {
