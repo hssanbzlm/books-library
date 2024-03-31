@@ -16,7 +16,7 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ default: true })
+  @Column({ default: false })
   admin: boolean;
 
   @OneToMany(() => UserToBook, (userToBook) => userToBook.user)

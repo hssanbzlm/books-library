@@ -6,16 +6,20 @@ import {
   Session,
   UseInterceptors,
   Get,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { SigninUserDto } from './dtos/signin-user.dto';
+import { AdminGuard } from 'src/guards/admin.guard';
 
 // classSerializerInterceptor use the magic of class-transform (@Exclude)
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+
+  @UseGuards(AdminGuard)
   @Post('/signup')
   signup(@Body() body: CreateUserDto) {
     const savedUser = this.authService.signup(body);
