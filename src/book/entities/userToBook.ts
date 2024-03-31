@@ -1,4 +1,4 @@
-import { User } from 'src/auth/entities/user.entity';
+import { User } from 'src/user/entities/user.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Book } from './book.entity';
 export type statusState =

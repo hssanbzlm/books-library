@@ -1,8 +1,8 @@
 import { MiddlewareConsumer, Module, ValidationPipe } from '@nestjs/common';
-import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './auth/entities/user.entity';
+import { User } from './user/entities/user.entity';
 import { APP_PIPE } from '@nestjs/core';
 import { BookModule } from './book/book.module';
 import { Book } from './book/entities/book.entity';
@@ -15,7 +15,7 @@ import { BookService } from './book/book.service';
 const cookieSession = require('cookie-session');
 @Module({
   imports: [
-    AuthModule,
+    UserModule,
     BookModule,
     ConfigModule.forRoot({
       isGlobal: true,

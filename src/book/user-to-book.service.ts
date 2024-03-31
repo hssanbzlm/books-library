@@ -12,7 +12,7 @@ import {
 import { Repository } from 'typeorm';
 import { Book } from './entities/book.entity';
 import { BorrowBookDto } from './dto/borrow-book.dto';
-import { User } from 'src/auth/entities/user.entity';
+import { User } from 'src/user/entities/user.entity';
 import * as moment from 'moment';
 import { instanceToPlain } from 'class-transformer';
 
