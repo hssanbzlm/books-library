@@ -14,6 +14,7 @@ import { Book } from './entities/book.entity';
 import { BorrowBookDto } from './dto/borrow-book.dto';
 import { User } from 'src/auth/entities/user.entity';
 import * as moment from 'moment';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class UserToBookService {
@@ -137,7 +138,17 @@ export class UserToBookService {
     return booksByEmail;
   }
 
-  getBorrowList() {
-    return this.userToBookRepo.find();
+  async getBorrowList(userId?: number) {
+    let userToBook: UserToBook[];
+    if (!userId) {
+      userToBook = await this.userToBookRepo.find({
+        relations: { user: true, book: true },
+      });
+    } else
+      userToBook = await this.userToBookRepo.find({
+        where: { userId },
+        relations: { book: true },
+      });
+    return instanceToPlain(userToBook);
   }
 }
