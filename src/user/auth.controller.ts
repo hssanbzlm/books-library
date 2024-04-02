@@ -33,6 +33,7 @@ export class AuthController {
   ) {
     const user = await this.authService.signin(email, password);
     session.userId = user.id;
+    return user;
   }
 
   @Post('/signout')
