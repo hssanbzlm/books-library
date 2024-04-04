@@ -1,10 +1,10 @@
-import { IsNumber, IsString } from 'class-validator';
-import { statusState } from '../entities/userToBook';
+import { IsEnum, IsNumber } from 'class-validator';
+import { status, statusState } from '../entities/userToBook';
 
 export class UpdateBorrowBookDto {
   @IsNumber()
   borrowId: number;
 
-  @IsString()
+  @IsEnum(status)
   status: statusState;
 }
