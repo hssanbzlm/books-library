@@ -1,13 +1,32 @@
-import {
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { UserToBook } from './userToBook';
-
+export type BookCategory =
+  | 'Horror'
+  | 'Thriller'
+  | 'Science fiction'
+  | 'Fantasy'
+  | 'Adventure'
+  | 'Romance'
+  | 'History'
+  | 'Psychology'
+  | 'Biography'
+  | 'Sport'
+  | 'Science'
+  | 'N/A';
+export enum Category {
+  Horror = 'Horror',
+  Thriller = 'Thriller',
+  ScienceFiction = 'Science fiction',
+  Fantasy = 'Fantasy',
+  Adventure = 'Adventure',
+  Romance = 'Romance',
+  History = 'History',
+  Psychology = 'Psychology',
+  Biography = 'Biography',
+  Sport = 'Sport',
+  Science = 'Science',
+  NA = 'N/A',
+}
 @Entity()
 export class Book {
   @PrimaryGeneratedColumn()
@@ -18,8 +37,10 @@ export class Book {
   numberOfPages: number;
   @Column()
   edition: string;
-  @Column()
-  date: Date;
+  @Column({ nullable: true })
+  year: number;
+  @Column({ default: 'N/A' })
+  category: BookCategory;
   @Column()
   quantity: number;
   @Column({ nullable: true })

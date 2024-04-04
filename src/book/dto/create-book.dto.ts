@@ -1,13 +1,13 @@
 import { Type } from 'class-transformer';
 import {
-  IsDate,
   IsNumber,
   IsString,
   IsNotEmpty,
   Min,
   ArrayMinSize,
-  IsArray,
+  IsEnum,
 } from 'class-validator';
+import { BookCategory, Category } from '../entities/book.entity';
 
 export class CreateBookDto {
   @IsNotEmpty()
@@ -20,9 +20,11 @@ export class CreateBookDto {
   @IsNotEmpty()
   @IsString()
   edition: string;
-  @Type(() => Date)
-  @IsDate()
-  date: Date;
+  @Type(() => Number)
+  @IsNumber()
+  year: number;
+  @IsEnum(Category)
+  category: BookCategory;
   @Type(() => Number)
   @IsNumber()
   @Min(1)
