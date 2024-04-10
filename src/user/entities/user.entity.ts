@@ -15,13 +15,6 @@ export class User {
   @Exclude()
   @Column()
   password: string;
-  @Transform(
-    ({ value }) => {
-      if (value) return 'Active';
-      return 'Inactive';
-    },
-    { toPlainOnly: true },
-  )
   @Column({ default: true })
   active: boolean;
 
