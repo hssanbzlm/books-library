@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
@@ -30,5 +30,14 @@ export class UserService {
       { active: updateUserActivity.active },
     );
     return instanceToPlain(user);
+  }
+
+  async removeOne(id: number) {
+    const user = await this.findOne(id);
+    if (user) {
+      const result = await this.userRepo.delete({ id });
+      return result;
+    }
+    throw new NotFoundException(`User ${id} not found`);
   }
 }
