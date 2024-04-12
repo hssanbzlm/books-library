@@ -20,15 +20,15 @@ export class UserService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.userRepo.update({ id }, updateUserDto);
+    const user = await this.userRepo.save({ id, ...updateUserDto });
     return instanceToPlain(user);
   }
 
   async updateActivity(id: number, updateUserActivity: UpdateUserActivity) {
-    const user = await this.userRepo.update(
-      { id },
-      { active: updateUserActivity.active },
-    );
+    const user = await this.userRepo.save({
+      id,
+      active: updateUserActivity.active,
+    });
     return instanceToPlain(user);
   }
 
