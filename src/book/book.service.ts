@@ -53,7 +53,8 @@ export class BookService {
       updateBookDto.coverPath = uploadedFile.secure_url;
     }
 
-    const updatedBook = this.bookRepo.save({ id, ...updateBookDto });
+    await this.bookRepo.save({ id, ...updateBookDto });
+    const updatedBook = await this.bookRepo.findOneBy({ id });
 
     if (oldFile) await this.cloudinaryService.removeFile(oldFile);
     return updatedBook;
