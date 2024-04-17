@@ -14,7 +14,6 @@ export class CreateBookDto {
   @IsString()
   title: string;
   @Type(() => Number)
-  @Min(50)
   @IsNumber()
   numberOfPages: number;
   @IsNotEmpty()
