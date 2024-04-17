@@ -8,10 +8,8 @@ import { BookModule } from './book/book.module';
 import { Book } from './book/entities/book.entity';
 import { UserToBook } from './book/entities/userToBook';
 import { CurrentUserMiddleware } from './middlewares/current-user/current-user.middleware';
-import { BorrowReminderService } from './tasks/borrow-reminder/borrow-reminder.service';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ScheduleModule } from '@nestjs/schedule';
-import { BookService } from './book/book.service';
 const cookieSession = require('cookie-session');
 @Module({
   imports: [
