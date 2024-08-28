@@ -110,6 +110,7 @@ export class UserToBookService {
         },
       );
     } else throw new NotFoundException('Resources not found');
+    return book;
   }
   async borrowList() {
     const nextDay = new Date();
