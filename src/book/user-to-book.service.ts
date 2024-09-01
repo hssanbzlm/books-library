@@ -144,12 +144,28 @@ export class UserToBookService {
     if (!userId) {
       userToBook = await this.userToBookRepo.find({
         relations: { user: true, book: true },
+        select: {
+          startDate: true,
+          endDate: true,
+          status: true,
+          user: {
+            id: true,
+            email: true,
+            name: true,
+            lastName: true,
+          },
+          book: {
+            id: true,
+            title: true,
+          },
+        },
       });
     } else
       userToBook = await this.userToBookRepo.find({
         where: { userId },
         relations: { book: true },
       });
+
     return instanceToPlain(userToBook);
   }
 }
