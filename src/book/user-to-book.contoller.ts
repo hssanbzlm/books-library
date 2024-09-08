@@ -11,15 +11,10 @@ import { UpdateBorrowBookDto } from './dto/update-borrow-book.dto';
 export class UserToBookController {
   constructor(private userToBookService: UserToBookService) {}
 
-  @UseGuards(AdminGuard)
-  @Get()
-  getAllList() {
-    return this.userToBookService.getBorrowList();
-  }
-
   @UseGuards(AuthGuard)
-  @Get('borrow-list')
-  getMyList(@currentUser() currentUser: User) {
+  @Get()
+  getAllList(@currentUser() currentUser: User) {
+    if (currentUser.admin) return this.userToBookService.getBorrowList();
     return this.userToBookService.getBorrowList(currentUser.id);
   }
 

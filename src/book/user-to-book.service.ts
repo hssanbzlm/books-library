@@ -140,31 +140,25 @@ export class UserToBookService {
   }
 
   async getBorrowList(userId?: number) {
-    let userToBook: UserToBook[];
-    if (!userId) {
-      userToBook = await this.userToBookRepo.find({
-        relations: { user: true, book: true },
-        select: {
-          startDate: true,
-          endDate: true,
-          status: true,
-          user: {
-            id: true,
-            email: true,
-            name: true,
-            lastName: true,
-          },
-          book: {
-            id: true,
-            title: true,
-          },
+    const userToBook = await this.userToBookRepo.find({
+      where: userId && { userId },
+      relations: { book: true, user: true },
+      select: {
+        startDate: true,
+        endDate: true,
+        status: true,
+        user: {
+          id: true,
+          email: true,
+          name: true,
+          lastName: true,
         },
-      });
-    } else
-      userToBook = await this.userToBookRepo.find({
-        where: { userId },
-        relations: { book: true },
-      });
+        book: {
+          id: true,
+          title: true,
+        },
+      },
+    });
 
     return instanceToPlain(userToBook);
   }
