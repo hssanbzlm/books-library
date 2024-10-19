@@ -144,6 +144,7 @@ export class UserToBookService {
       where: userId && { userId },
       relations: { book: true, user: true },
       select: {
+        userToBookId: true,
         startDate: true,
         endDate: true,
         status: true,
