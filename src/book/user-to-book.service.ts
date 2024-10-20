@@ -49,13 +49,14 @@ export class UserToBookService {
     if (!userToBook) {
       throw new NotFoundException('check details');
     }
+    const newUserToBook = { ...userToBook, status };
     if (userToBook.status != status) {
       await this.bookReposistory.manager.transaction(
         async (transactionalEntityManager) => {
           await transactionalEntityManager.update(
             UserToBook,
             { userToBookId: userToBook.userToBookId },
-            { ...userToBook, status },
+            newUserToBook,
           );
           if (
             status == borrowStatus.Damaged ||
@@ -71,6 +72,9 @@ export class UserToBookService {
         },
       );
     } else return 'same status';
+    return await this.getBorrowList({
+      userToBookId: newUserToBook.userToBookId,
+    });
   }
 
   async borrow(
@@ -139,9 +143,15 @@ export class UserToBookService {
     return booksByEmail;
   }
 
-  async getBorrowList(userId?: number) {
+  async getBorrowList(userToBooksParams?: {
+    userId?: number;
+    userToBookId?: number;
+  }) {
     const userToBook = await this.userToBookRepo.find({
-      where: userId && { userId },
+      where: {
+        userId: userToBooksParams?.userId,
+        userToBookId: userToBooksParams?.userToBookId,
+      },
       relations: { book: true, user: true },
       select: {
         userToBookId: true,
@@ -161,6 +171,19 @@ export class UserToBookService {
       },
     });
 
-    return instanceToPlain(userToBook);
+    return instanceToPlain(
+      userToBook.map((userToBook) => ({
+        userToBookId: userToBook.userToBookId,
+        status: userToBook.status,
+        userId: userToBook.user.id,
+        userName: userToBook.user.name,
+        userLastName: userToBook.user.lastName,
+        email: userToBook.user.email,
+        bookId: userToBook.book.id,
+        bookTitle: userToBook.book.title,
+        endDate: userToBook.endDate,
+        startDate: userToBook.startDate,
+      })),
+    );
   }
 }

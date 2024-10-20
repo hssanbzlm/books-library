@@ -15,7 +15,7 @@ export class UserToBookController {
   @Get()
   getAllList(@currentUser() currentUser: User) {
     if (currentUser.admin) return this.userToBookService.getBorrowList();
-    return this.userToBookService.getBorrowList(currentUser.id);
+    return this.userToBookService.getBorrowList({ userId: currentUser.id });
   }
 
   @UseGuards(AuthGuard)
