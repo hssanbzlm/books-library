@@ -15,6 +15,7 @@ import { BorrowBookDto } from './dto/borrow-book.dto';
 import { User } from 'src/user/entities/user.entity';
 import * as moment from 'moment';
 import { instanceToPlain } from 'class-transformer';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class UserToBookService {
@@ -23,6 +24,7 @@ export class UserToBookService {
     private userToBookRepo: Repository<UserToBook>,
     @InjectRepository(Book) private bookReposistory: Repository<Book>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async isBorrowed(userId: number, bookId: number) {
@@ -49,7 +51,12 @@ export class UserToBookService {
     if (!userToBook) {
       throw new NotFoundException('check details');
     }
-    const newUserToBook = { ...userToBook, status };
+    const newUserToBook = {
+      ...userToBook,
+      status,
+      receiverSeen: false,
+      receiverRole: 'user',
+    };
     if (userToBook.status != status) {
       await this.bookReposistory.manager.transaction(
         async (transactionalEntityManager) => {
@@ -72,6 +79,9 @@ export class UserToBookService {
         },
       );
     } else return 'same status';
+
+    this.eventEmitter.emit('userNotif.userToBook.changes', newUserToBook);
+
     return await this.getBorrowList({
       userToBookId: newUserToBook.userToBookId,
     });
@@ -81,6 +91,7 @@ export class UserToBookService {
     { idBook, startDate, endDate }: BorrowBookDto,
     currentUser: User,
   ) {
+    let userToBook: UserToBook;
     const isBorrowed = await this.isBorrowed(currentUser.id, idBook);
     if (isBorrowed) {
       throw new BadRequestException(
@@ -100,8 +111,9 @@ export class UserToBookService {
             startDate,
             endDate,
             status: borrowStatus.Pending,
+            receiverRole: 'admin',
           });
-          await transactionalEntityManager.save(UserToBook, {
+          userToBook = await transactionalEntityManager.save(UserToBook, {
             ...detailBorrow,
             book,
             user,
@@ -114,6 +126,20 @@ export class UserToBookService {
         },
       );
     } else throw new NotFoundException('Resources not found');
+    this.eventEmitter.emit('adminNotif.userToBook.changes', {
+      userToBookId: userToBook.userToBookId,
+      status: userToBook.status,
+      userId: userToBook.userId,
+      userName: userToBook.user.name,
+      userLastName: userToBook.user.lastName,
+      bookId: userToBook.bookId,
+      bookTitle: userToBook.book.title,
+      endDate: userToBook.endDate,
+      startDate: userToBook.startDate,
+      receiverRole: userToBook.receiverRole,
+      receiverSeen: userToBook.receiverSeen,
+      email: userToBook.user.email,
+    });
     return book;
   }
   async borrowList() {
