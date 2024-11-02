@@ -10,11 +10,14 @@ import { UserToBook } from './book/entities/userToBook';
 import { CurrentUserMiddleware } from './middlewares/current-user/current-user.middleware';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ScheduleModule } from '@nestjs/schedule';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+
 const cookieSession = require('cookie-session');
 @Module({
   imports: [
     UserModule,
     BookModule,
+    EventEmitterModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: `.env.${process.env.NODE_ENV}`,

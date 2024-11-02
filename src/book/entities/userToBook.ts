@@ -39,6 +39,12 @@ export class UserToBook {
   @Column({ default: 'Pending' })
   status: statusState;
 
+  @Column({ default: 'user' })
+  receiverRole: string;
+
+  @Column({ default: false })
+  receiverSeen: boolean;
+
   @ManyToOne(() => User, (user) => user.userToBooks)
   user: User;
 

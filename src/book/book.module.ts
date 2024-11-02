@@ -9,6 +9,7 @@ import { BorrowReminderService } from 'src/tasks/borrow-reminder/borrow-reminder
 import { UserToBookService } from './user-to-book.service';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { UserToBookController } from './user-to-book.contoller';
+import { BorrowNotificationService } from './borrow-notification/borrow-notification.service';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { UserToBookController } from './user-to-book.contoller';
     CloudinaryModule,
   ],
   controllers: [BookController, UserToBookController],
-  providers: [BookService, BorrowReminderService, UserToBookService],
+  providers: [BookService, BorrowReminderService, UserToBookService, BorrowNotificationService],
   exports: [BookService, UserToBookService],
 })
 export class BookModule {}
