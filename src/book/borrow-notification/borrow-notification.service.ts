@@ -21,7 +21,6 @@ export class BorrowNotificationService {
   @OnEvent('adminNotif.userToBook.changes')
   private adminNotifChanges(payload: UserToBook) {
     this.adminNotifications$.next({ data: payload });
-    console.log('new admin notif data ', payload);
   }
 
   public subscribeForUserNotification(userId: number) {
@@ -76,11 +75,7 @@ export class BorrowNotificationService {
     }));
   }
 
-  async notificationSeen(
-    userRole: 'admin' | 'user',
-    userId: number,
-    notifications: number[],
-  ) {
+  async notificationSeen(notifications: number[]) {
     try {
       const result = await this.userToBookRepository
         .createQueryBuilder()

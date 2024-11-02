@@ -71,15 +71,7 @@ export class UserToBookController {
   }
 
   @Put('notifications-seen')
-  updateNotificationSeend(
-    @currentUser() currentUser: User,
-    @Body() body: UpdateNotifSeenDto,
-  ) {
-    const userRole = currentUser.admin ? 'admin' : 'user';
-    return this.borrowNotificationService.notificationSeen(
-      userRole,
-      currentUser.id,
-      body.notifications,
-    );
+  updateNotificationSeend(@Body() body: UpdateNotifSeenDto) {
+    return this.borrowNotificationService.notificationSeen(body.notifications);
   }
 }
