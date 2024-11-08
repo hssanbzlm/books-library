@@ -69,6 +69,13 @@ export class UserToBookController {
       userRole,
     );
   }
+  @Get('is-ready-to-borrow/:bookId')
+  isBookReadyToBorrow(
+    @currentUser() currentUser: User,
+    @Param('bookId', ParseIntPipe) bookId: number,
+  ) {
+    return this.userToBookService.isReadyToBorrow(currentUser.id, bookId);
+  }
 
   @Put('notifications-seen')
   updateNotificationSeend(@Body() body: UpdateNotifSeenDto) {

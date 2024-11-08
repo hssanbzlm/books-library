@@ -43,6 +43,21 @@ export class UserToBookService {
       .getOne();
     return book;
   }
+  async isReadyToBorrow(userId: number, bookId: number) {
+    const isBorrowed = await this.isBorrowed(userId, bookId);
+    if (!isBorrowed) {
+      const book = await this.bookReposistory.findOne({
+        where: { id: bookId },
+      });
+      if (book.quantity == 0) {
+        throw new BadRequestException(`This book is not available now `);
+      } else return book;
+    } else {
+      throw new BadRequestException(
+        `This book is already in ${isBorrowed.status} state`,
+      );
+    }
+  }
 
   async updateBorrowStatus(borrowId: number, status: statusState) {
     const userToBook = await this.userToBookRepo.findOneBy({
@@ -92,17 +107,11 @@ export class UserToBookService {
     currentUser: User,
   ) {
     let userToBook: UserToBook;
-    const isBorrowed = await this.isBorrowed(currentUser.id, idBook);
-    if (isBorrowed) {
-      throw new BadRequestException(
-        `This book is already in ${isBorrowed.status} state`,
-      );
-    }
-    const book = await this.bookReposistory.findOne({ where: { id: idBook } });
-    const user = await this.userRepository.findOne({
-      where: { id: currentUser.id },
-    });
-    if (book && book.quantity > 0 && user) {
+    const book = await this.isReadyToBorrow(currentUser.id, idBook);
+    if (book) {
+      const user = await this.userRepository.findOne({
+        where: { id: currentUser.id },
+      });
       await this.bookReposistory.manager.transaction(
         async (transactionalEntityManager) => {
           const detailBorrow = transactionalEntityManager.create(UserToBook, {
