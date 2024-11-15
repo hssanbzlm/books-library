@@ -16,6 +16,7 @@ import { User } from 'src/user/entities/user.entity';
 import * as moment from 'moment';
 import { instanceToPlain } from 'class-transformer';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { UpdateUserBorrowDto } from './dto/update-user-borrow.dto';
 
 @Injectable()
 export class UserToBookService {
@@ -100,6 +101,63 @@ export class UserToBookService {
     return await this.getBorrowList({
       userToBookId: newUserToBook.userToBookId,
     });
+  }
+
+  async updateUserBorrow({
+    borrowId,
+    startDate,
+    endDate,
+  }: UpdateUserBorrowDto) {
+    const userToBook = await this.userToBookRepo.findOne({
+      where: {
+        userToBookId: borrowId,
+      },
+      relations: { book: true, user: true },
+      select: {
+        userToBookId: true,
+        startDate: true,
+        endDate: true,
+        status: true,
+        receiverSeen: true,
+        user: {
+          id: true,
+          email: true,
+          name: true,
+          lastName: true,
+        },
+        book: {
+          id: true,
+          title: true,
+        },
+      },
+    });
+    if (!userToBook || userToBook.status != 'Pending') {
+      throw new NotFoundException('Updating is not possible');
+    }
+
+    const updated = await this.userToBookRepo.save({
+      userToBookId: userToBook.userToBookId,
+      userId: userToBook.userId,
+      bookId: userToBook.bookId,
+      status: userToBook.status,
+      receiverRole: userToBook.receiverRole,
+      receiverSeen: userToBook.receiverSeen,
+      startDate,
+      endDate,
+    });
+    return {
+      userToBookId: userToBook.userToBookId,
+      status: userToBook.status,
+      userId: userToBook.user.id,
+      userName: userToBook.user.name,
+      userLastName: userToBook.user.lastName,
+      email: userToBook.user.email,
+      bookId: userToBook.book.id,
+      bookTitle: userToBook.book.title,
+      endDate: updated.endDate,
+      startDate: updated.startDate,
+      receiverSeen: userToBook.receiverSeen,
+    };
   }
 
   async borrow(
