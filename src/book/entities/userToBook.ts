@@ -9,7 +9,8 @@ export type statusState =
   | 'Damaged'
   | 'Lost'
   | 'Returned'
-  | 'Overdue';
+  | 'Overdue'
+  | 'Canceled';
 export enum status {
   Pending = 'Pending',
   CheckedOut = 'Checked-out',
@@ -19,6 +20,7 @@ export enum status {
   Lost = 'Lost',
   Returned = 'Returned',
   Overdue = 'Overdue',
+  Canceled = 'Canceled',
 }
 @Entity()
 export class UserToBook {

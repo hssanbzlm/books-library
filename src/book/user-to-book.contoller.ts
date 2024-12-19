@@ -21,6 +21,7 @@ import { Observable } from 'rxjs';
 import { BorrowNotificationService } from './borrow-notification/borrow-notification.service';
 import { UpdateNotifSeenDto } from './dto/update-notif-seen.dto';
 import { UpdateUserBorrowDto } from './dto/update-user-borrow.dto';
+import { CancelBorrowDto } from './dto/cancel-borrow.dto';
 
 @Controller('user-to-book')
 export class UserToBookController {
@@ -87,5 +88,10 @@ export class UserToBookController {
   @Put('update-user-borrow')
   updateUserBorrow(@Body() body: UpdateUserBorrowDto) {
     return this.userToBookService.updateUserBorrow(body);
+  }
+  @UseGuards(AuthGuard)
+  @Put('cancel-user-borrow')
+  cancelUserBorrow(@Body() body: CancelBorrowDto) {
+    return this.userToBookService.CancelUserBorrow(body);
   }
 }
