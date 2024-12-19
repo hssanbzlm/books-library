@@ -62,8 +62,26 @@ export class UserToBookService {
   }
 
   async updateBorrowStatus(borrowId: number, status: statusState) {
-    const userToBook = await this.userToBookRepo.findOneBy({
-      userToBookId: borrowId,
+    const userToBook = await this.userToBookRepo.findOne({
+      where: { userToBookId: borrowId },
+      relations: { book: true, user: true },
+      select: {
+        userToBookId: true,
+        startDate: true,
+        endDate: true,
+        status: true,
+        receiverSeen: true,
+        user: {
+          id: true,
+          email: true,
+          name: true,
+          lastName: true,
+        },
+        book: {
+          id: true,
+          title: true,
+        },
+      },
     });
     if (!userToBook) {
       throw new NotFoundException('check details');
@@ -97,7 +115,20 @@ export class UserToBookService {
       );
     } else return 'same status';
 
-    this.eventEmitter.emit('userNotif.userToBook.changes', newUserToBook);
+    this.eventEmitter.emit('userNotif.userToBook.changes', {
+      userToBookId: newUserToBook.userToBookId,
+      status: newUserToBook.status,
+      userId: newUserToBook.user.id,
+      userName: newUserToBook.user.name,
+      userLastName: newUserToBook.user.lastName,
+      bookId: newUserToBook.book.id,
+      bookTitle: newUserToBook.book.title,
+      endDate: newUserToBook.endDate,
+      startDate: newUserToBook.startDate,
+      receiverRole: newUserToBook.receiverRole,
+      receiverSeen: newUserToBook.receiverSeen,
+      email: newUserToBook.user.email,
+    });
 
     return await this.getBorrowList({
       userToBookId: newUserToBook.userToBookId,
