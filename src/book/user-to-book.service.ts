@@ -335,6 +335,7 @@ export class UserToBookService {
         startDate: true,
         endDate: true,
         status: true,
+        createdDate: true,
         user: {
           id: true,
           email: true,
@@ -349,18 +350,21 @@ export class UserToBookService {
     });
 
     return instanceToPlain(
-      userToBook.map((userToBook) => ({
-        userToBookId: userToBook.userToBookId,
-        status: userToBook.status,
-        userId: userToBook.user.id,
-        userName: userToBook.user.name,
-        userLastName: userToBook.user.lastName,
-        email: userToBook.user.email,
-        bookId: userToBook.book.id,
-        bookTitle: userToBook.book.title,
-        endDate: userToBook.endDate,
-        startDate: userToBook.startDate,
-      })),
+      userToBook
+        .sort((a, b) => (a.createdDate <= b.createdDate ? 1 : -1))
+        .map((userToBook) => ({
+          createdDate: userToBook.createdDate,
+          userToBookId: userToBook.userToBookId,
+          status: userToBook.status,
+          userId: userToBook.user.id,
+          userName: userToBook.user.name,
+          userLastName: userToBook.user.lastName,
+          email: userToBook.user.email,
+          bookId: userToBook.book.id,
+          bookTitle: userToBook.book.title,
+          endDate: userToBook.endDate,
+          startDate: userToBook.startDate,
+        })),
     );
   }
 }

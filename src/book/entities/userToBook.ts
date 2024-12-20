@@ -1,5 +1,11 @@
 import { User } from 'src/user/entities/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+} from 'typeorm';
 import { Book } from './book.entity';
 export type statusState =
   | 'Pending'
@@ -26,6 +32,9 @@ export enum status {
 export class UserToBook {
   @PrimaryGeneratedColumn()
   userToBookId: number;
+
+  @CreateDateColumn()
+  createdDate: Date;
 
   @Column()
   userId: number;
