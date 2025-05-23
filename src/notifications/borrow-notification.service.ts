@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { filter, Subject } from 'rxjs';
-import { UserToBook } from '../entities/userToBook';
+import { UserToBook } from '../book/entities/userToBook';
 import { In, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 

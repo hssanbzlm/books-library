@@ -9,15 +9,19 @@ import { BorrowReminderService } from 'src/tasks/borrow-reminder/borrow-reminder
 import { UserToBookService } from './user-to-book.service';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { UserToBookController } from './user-to-book.contoller';
-import { BorrowNotificationService } from './borrow-notification/borrow-notification.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Book, User, UserToBook]),
     CloudinaryModule,
+    HttpModule,
   ],
   controllers: [BookController, UserToBookController],
-  providers: [BookService, BorrowReminderService, UserToBookService, BorrowNotificationService],
-  exports: [BookService, UserToBookService],
+  providers: [
+    BookService,
+    BorrowReminderService,
+    UserToBookService,
+  ],
 })
 export class BookModule {}

@@ -19,6 +19,8 @@ export class CreateBookDto {
   @IsNotEmpty()
   @IsString()
   edition: string;
+  @IsString()
+  synopsis: string;
   @Type(() => Number)
   @IsNumber()
   year: number;

@@ -18,6 +18,7 @@ import { UpdateBookDto } from './dto/update-book.dto';
 import { AdminGuard } from 'src/guards/admin.guard';
 import { QueryBookDto } from './dto/query-book.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { RecommendBookDto } from './dto/recommend-book.dto';
 
 @Controller('book')
 export class BookController {
@@ -63,5 +64,10 @@ export class BookController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.bookService.remove(id);
+  }
+
+  @Get('recommend')
+  recommend(@Body() text:RecommendBookDto ){
+    return this.bookService.recommend(text)
   }
 }

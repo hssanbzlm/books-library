@@ -1,5 +1,24 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn, ValueTransformer } from 'typeorm';
 import { UserToBook } from './userToBook';
+
+export class VectorTransformer implements ValueTransformer {
+  to(data: number[] | null): string | null {
+    if (!data) {
+      return null;
+    }
+    return `[${data.join(',')}]`; 
+  }
+
+  from(value: string | null): number[] | null {
+    if (!value) {
+      return null;
+    }
+    const stringArray = value.substring(1, value.length - 1).split(',');
+    return stringArray.map(str => parseFloat(str.trim()));
+  }
+}
+
+
 export type BookCategory =
   | 'Horror'
   | 'Thriller'
@@ -37,6 +56,8 @@ export class Book {
   numberOfPages: number;
   @Column()
   edition: string;
+  @Column({ nullable: false })
+  synopsis: string;
   @Column({ nullable: true })
   year: number;
   @Column({ default: 'N/A' })
@@ -47,6 +68,8 @@ export class Book {
   coverPath: string;
   @Column('text', { array: true })
   authors: string[];
+  @Column({type: 'varchar',transformer:new VectorTransformer(),nullable: true})
+  embedding: number[];
 
   @OneToMany(() => UserToBook, (userToBook) => userToBook.book)
   userToBooks: UserToBook[];

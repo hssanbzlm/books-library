@@ -5,7 +5,6 @@ import {
   Patch,
   Get,
   Controller,
-  Sse,
   ParseIntPipe,
   Param,
   Put,
@@ -17,9 +16,6 @@ import { BorrowBookDto } from './dto/borrow-book.dto';
 import { UserToBookService } from './user-to-book.service';
 import { AdminGuard } from 'src/guards/admin.guard';
 import { UpdateBorrowBookDto } from './dto/update-borrow-book.dto';
-import { Observable } from 'rxjs';
-import { BorrowNotificationService } from './borrow-notification/borrow-notification.service';
-import { UpdateNotifSeenDto } from './dto/update-notif-seen.dto';
 import { UpdateUserBorrowDto } from './dto/update-user-borrow.dto';
 import { CancelBorrowDto } from './dto/cancel-borrow.dto';
 
@@ -27,7 +23,6 @@ import { CancelBorrowDto } from './dto/cancel-borrow.dto';
 export class UserToBookController {
   constructor(
     private userToBookService: UserToBookService,
-    private borrowNotificationService: BorrowNotificationService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -51,37 +46,13 @@ export class UserToBookController {
       body.status,
     );
   }
-  @Sse('borrow-notification/user-notif/:userId')
-  getUserBorrowNotification(
-    @Param('userId', ParseIntPipe) userId: number,
-  ): Observable<any> {
-    return this.borrowNotificationService.subscribeForUserNotification(userId);
-  }
 
-  @Sse('borrow-notification/admin-notif/:adminId')
-  getAdminBorrowNotification(): Observable<any> {
-    return this.borrowNotificationService.subscribeForAdminNotification();
-  }
-
-  @Get('notifications')
-  getMissedNotification(@currentUser() currentUser: User) {
-    const userRole = currentUser.admin ? 'admin' : 'user';
-    return this.borrowNotificationService.getNotificationsStatus(
-      currentUser.id,
-      userRole,
-    );
-  }
   @Get('is-ready-to-borrow/:bookId')
   isBookReadyToBorrow(
     @currentUser() currentUser: User,
     @Param('bookId', ParseIntPipe) bookId: number,
   ) {
     return this.userToBookService.isReadyToBorrow(currentUser.id, bookId);
-  }
-
-  @Put('notifications-seen')
-  updateNotificationSeend(@Body() body: UpdateNotifSeenDto) {
-    return this.borrowNotificationService.notificationSeen(body.notifications);
   }
 
   @UseGuards(AuthGuard)

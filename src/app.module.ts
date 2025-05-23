@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, ValidationPipe } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, ValidationPipe } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,8 +11,10 @@ import { CurrentUserMiddleware } from './middlewares/current-user/current-user.m
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { NotificationsModule } from './notifications/notifications.module';
 
 const cookieSession = require('cookie-session');
+
 @Module({
   imports: [
     UserModule,
@@ -48,10 +50,10 @@ const cookieSession = require('cookie-session');
       }),
     }),
     ScheduleModule.forRoot(),
+    NotificationsModule,
   ],
   providers: [
     {
-      // Vliadation pipe use the magic of class validators(@IsString,@IsEmail)
       provide: APP_PIPE,
       useValue: new ValidationPipe({
         whitelist: true,
@@ -65,6 +67,7 @@ export class AppModule {
     consumer
       .apply(cookieSession({ keys: [this.configService.get('COOKIE_KEY')] }))
       .forRoutes('*');
+
     consumer.apply(CurrentUserMiddleware).forRoutes('*');
   }
 }
