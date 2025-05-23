@@ -24,6 +24,11 @@ import { RecommendBookDto } from './dto/recommend-book.dto';
 export class BookController {
   constructor(private readonly bookService: BookService) {}
 
+  @Get('recommend')
+  recommend(@Body() text: RecommendBookDto) {
+    return this.bookService.recommend(text);
+  }
+
   @Get()
   findAll() {
     return this.bookService.findAll();
@@ -64,10 +69,5 @@ export class BookController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.bookService.remove(id);
-  }
-
-  @Get('recommend')
-  recommend(@Body() text:RecommendBookDto ){
-    return this.bookService.recommend(text)
   }
 }
