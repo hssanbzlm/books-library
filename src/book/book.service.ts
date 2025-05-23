@@ -84,11 +84,45 @@ export class BookService {
     });
   }
   async recommend({ text }: RecommendBookDto) {
+    const frontUrl = this.configService.get<string>('FRONT_URL');
+    const chatCompletionToken = this.configService.get<string>(
+      'CHAT_COMPLETION_TOKEN',
+    );
+    const chatCompletionUrl = this.configService.get<string>(
+      'CHAT_COMPLETION_URL',
+    );
+    const chatCompletionModel = this.configService.get<string>(
+      'CHAT_COMPLETION_MODEL',
+    );
+
     const books = await this.bookCosineSimilarity(text);
-    return books.map((book) => ({
+    const recommendation = books.map((book) => ({
       title: book.title,
+      bookUrl: `${frontUrl}/user/book/${book.id}`,
       synopsis: book.synopsis,
     }));
+
+    const friendlyPrompt = `Recommend the following books to a user based on their interests. Write in a warm, clear, and engaging tone, but do not include greetings or introductions. Just recommend the books directly. Use the synopsis to briefly describe each book,
+     and include a link to help the user read more about it. ${JSON.stringify(recommendation)}. 
+    Output a short paragraph that naturally presents these books as great choices, 
+    using the synopsis and the URLs to help the user learn more
+    `;
+    const response = await lastValueFrom(
+      this.httpService.post(
+        chatCompletionUrl,
+        {
+          model: chatCompletionModel,
+          messages: [
+            {
+              role: 'user',
+              content: friendlyPrompt,
+            },
+          ],
+        },
+        { headers: { Authorization: `Bearer ${chatCompletionToken}` } },
+      ),
+    );
+    return response.data;
   }
 
   private async generateBookEmbedding(dataToEmbed: any): Promise<number[]> {
