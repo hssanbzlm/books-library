@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BorrowNotificationService } from '../borrow-notification.service';
+import { BorrowNotificationService } from './borrow-notification.service';
 
 describe('BorrowNotificationService', () => {
   let service: BorrowNotificationService;
