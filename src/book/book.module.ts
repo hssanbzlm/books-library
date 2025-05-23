@@ -10,6 +10,7 @@ import { UserToBookService } from './user-to-book.service';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { UserToBookController } from './user-to-book.contoller';
 import { HttpModule } from '@nestjs/axios';
+import { BookRecommendService } from './book-recommend.service';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { HttpModule } from '@nestjs/axios';
     BookService,
     BorrowReminderService,
     UserToBookService,
+    BookRecommendService,
   ],
 })
 export class BookModule {}

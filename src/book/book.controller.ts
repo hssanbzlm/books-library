@@ -19,14 +19,18 @@ import { AdminGuard } from 'src/guards/admin.guard';
 import { QueryBookDto } from './dto/query-book.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RecommendBookDto } from './dto/recommend-book.dto';
+import { BookRecommendService } from './book-recommend.service';
 
 @Controller('book')
 export class BookController {
-  constructor(private readonly bookService: BookService) {}
+  constructor(
+    private readonly bookService: BookService,
+    private readonly bookRecommendService: BookRecommendService,
+  ) {}
 
   @Get('recommend')
   recommend(@Body() text: RecommendBookDto) {
-    return this.bookService.recommend(text);
+    return this.bookRecommendService.recommend(text);
   }
 
   @Get()
