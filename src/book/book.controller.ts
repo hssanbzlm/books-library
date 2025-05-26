@@ -18,7 +18,6 @@ import { UpdateBookDto } from './dto/update-book.dto';
 import { AdminGuard } from 'src/guards/admin.guard';
 import { QueryBookDto } from './dto/query-book.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { RecommendBookDto } from './dto/recommend-book.dto';
 import { BookRecommendService } from './book-recommend.service';
 
 @Controller('book')
@@ -29,7 +28,7 @@ export class BookController {
   ) {}
 
   @Get('recommend')
-  recommend(@Body() text: RecommendBookDto) {
+  recommend(@Query('text') text: string) {
     return this.bookRecommendService.recommend(text);
   }
 

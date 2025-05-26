@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { RecommendBookDto } from './dto/recommend-book.dto';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,7 +17,7 @@ export class BookRecommendService {
     private readonly configService: ConfigService,
   ) {}
 
-  async recommend({ text }: RecommendBookDto) {
+  async recommend(text:string) {
     const frontUrl = this.configService.get<string>('FRONT_URL');
     const chatCompletionToken = this.configService.get<string>(
       'CHAT_COMPLETION_TOKEN',
@@ -41,6 +40,7 @@ export class BookRecommendService {
      and include a link to help the user read more about it. ${JSON.stringify(recommendation)}. 
     Output a short paragraph that naturally presents these books as great choices, 
     using the synopsis and the URLs to help the user learn more. The most important thing, always use the url of each book in response.
+    do not use markdown language and this is mandatory, only put the link between two parentheses"
     `;
     const response = await lastValueFrom(
       this.httpService.post(
@@ -57,7 +57,7 @@ export class BookRecommendService {
         { headers: { Authorization: `Bearer ${chatCompletionToken}` } },
       ),
     );
-    return response.data;
+    return response.data.choices[0].message;
   }
 
   async generateBookEmbedding(dataToEmbed: any): Promise<number[]> {
