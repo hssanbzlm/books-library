@@ -6,8 +6,7 @@ import { Book } from './entities/book.entity';
 import { Repository } from 'typeorm';
 import { lastValueFrom } from 'rxjs';
 
-const EMBEDDING_URL = 'https://api.together.xyz/v1/embeddings';
-const EMBEDDING_MODEL = 'WhereIsAI/UAE-Large-V1';
+const NOT_FOUND_BOOKS_PROMPT='You are an assistant inside a web application that mainly borrow books who response in friendly way to say that unfortunately we did not find books to recommend that meet his needs, do not ask further questions, just tell him to try searching by himself in our library and add emojis in your response'
 @Injectable()
 export class BookRecommendService {
   constructor(
@@ -28,6 +27,7 @@ export class BookRecommendService {
     const chatCompletionModel = this.configService.get<string>(
       'CHAT_COMPLETION_MODEL',
     );
+    let friendlyPrompt= NOT_FOUND_BOOKS_PROMPT;
 
     const books = await this.bookCosineSimilarity(text);
     const recommendation = books.map((book) => ({
@@ -35,38 +35,43 @@ export class BookRecommendService {
       bookUrl: `${frontUrl}/user/book/${book.id}`,
       synopsis: book.synopsis,
     }));
+     if(recommendation.length){
+       friendlyPrompt = `Recommend the following books to a user based on their interests. Write in a warm, clear, and engaging tone, but do not include greetings or introductions. Just recommend the books directly. Use the synopsis to briefly describe each book,
+        and include a link to help the user read more about it. ${JSON.stringify(recommendation)}. 
+       Output a short paragraph that naturally presents these books as great choices, 
+       using the synopsis and the URLs to help the user learn more. The most important thing, always use the url of each book in response.
+       do not use markdown language and this is mandatory, only put the link between two parentheses"
+       `;
+     }
 
-    const friendlyPrompt = `Recommend the following books to a user based on their interests. Write in a warm, clear, and engaging tone, but do not include greetings or introductions. Just recommend the books directly. Use the synopsis to briefly describe each book,
-     and include a link to help the user read more about it. ${JSON.stringify(recommendation)}. 
-    Output a short paragraph that naturally presents these books as great choices, 
-    using the synopsis and the URLs to help the user learn more. The most important thing, always use the url of each book in response.
-    do not use markdown language and this is mandatory, only put the link between two parentheses"
-    `;
-    const response = await lastValueFrom(
-      this.httpService.post(
-        chatCompletionUrl,
-        {
-          model: chatCompletionModel,
-          messages: [
-            {
-              role: 'user',
-              content: friendlyPrompt,
-            },
-          ],
-        },
-        { headers: { Authorization: `Bearer ${chatCompletionToken}` } },
-      ),
-    );
-    return response.data.choices[0].message;
+       const response = await lastValueFrom(
+         this.httpService.post(
+           chatCompletionUrl,
+           {
+             model: chatCompletionModel,
+             messages: [
+               {
+                 role: 'user',
+                 content: friendlyPrompt,
+               },
+             ],
+           },
+           { headers: { Authorization: `Bearer ${chatCompletionToken}` } },
+         ),
+       );
+       return response.data.choices[0].message;
+     
   }
 
   async generateBookEmbedding(dataToEmbed: any): Promise<number[]> {
     const token = this.configService.get<string>('EMBEDDING_TOKEN');
+    const embeddingUrl= this.configService.get<string>('EMBEDDING_URL');
+    const embeddingModel = this.configService.get<string>('EMBEDDING_MODEL');
 
     const response = await lastValueFrom(
       this.httpService.post(
-        EMBEDDING_URL,
-        { model: EMBEDDING_MODEL, input: [dataToEmbed] },
+        embeddingUrl,
+        { model: embeddingModel, input: [dataToEmbed] },
         { headers: { Authorization: `Bearer ${token}` } },
       ),
     );
@@ -79,8 +84,9 @@ export class BookRecommendService {
 
     const result = (await this.bookRepo.query(
       `
-      SELECT *, (embedding::vector) <-> $1::vector AS similarity
+      SELECT *, (embedding::vector) <=> $1::vector AS similarity
       FROM book
+      where (embedding::vector) <=> $1::vector <= 0.5
       ORDER BY similarity ASC
       LIMIT $2 
       `,
