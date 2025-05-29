@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from './entities/book.entity';
 import { Repository, Like } from 'typeorm';
 import { QueryBookDto } from './dto/query-book.dto';
-import { CloudinaryService } from 'src/cloudinary/service/cloudinary/cloudinary.service';
+import { CloudinaryService } from 'src/book/cloudinary.service';
 import { BookRecommendService } from './book-recommend.service';
 
 @Injectable()

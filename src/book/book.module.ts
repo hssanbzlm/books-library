@@ -7,16 +7,49 @@ import { UserToBook } from './entities/userToBook';
 import { User } from 'src/user/entities/user.entity';
 import { BorrowReminderService } from 'src/tasks/borrow-reminder/borrow-reminder.service';
 import { UserToBookService } from './user-to-book.service';
-import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { UserToBookController } from './user-to-book.contoller';
 import { HttpModule } from '@nestjs/axios';
 import { BookRecommendService } from './book-recommend.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CloudinaryService } from './cloudinary.service';
+import { v2 as cloudinary } from 'cloudinary';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: `.env.${process.env.NODE_ENV}`,
+    }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres',
+        username: config.get<string>('DB_USERNAME'),
+        password: config.get<string>('DB_PASSWORD'),
+        port: config.get<number>('DB_PORT'),
+        entities: [User, Book, UserToBook],
+        synchronize: true,
+      }),
+    }),
     TypeOrmModule.forFeature([Book, User, UserToBook]),
-    CloudinaryModule,
     HttpModule,
+    MailerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        transport: {
+          service: 'Gmail',
+          tls: { rejectUnauthorized: false },
+          auth: {
+            user: config.get<string>('EMAIL_REMINDER'),
+            pass: config.get<string>('EMAIL_REMINDER_PASSWORD'),
+          },
+        },
+      }),
+    }),
   ],
   controllers: [BookController, UserToBookController],
   providers: [
@@ -24,6 +57,18 @@ import { BookRecommendService } from './book-recommend.service';
     BorrowReminderService,
     UserToBookService,
     BookRecommendService,
+    CloudinaryService,
+    {
+      provide: 'CLOUDINARY',
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        return cloudinary.config({
+          cloud_name: config.get<string>('CLOUDINARY_NAME'),
+          api_key: config.get<string>('CLOUDINARY_API_KEY'),
+          api_secret: config.get<string>('CLOUDINARY_API_SECRET'),
+        });
+      },
+    },
   ],
 })
 export class BookModule {}
