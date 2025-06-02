@@ -19,6 +19,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
+import { BookModule } from './book/book.module';
 
 const cookieSession = require('cookie-session');
 
@@ -35,6 +36,7 @@ const cookieSession = require('cookie-session');
       },
     ]),
     UserModule,
+    BookModule,
     EventEmitterModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
