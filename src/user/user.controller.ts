@@ -1,51 +1,32 @@
-import {
-  Controller,
-  Get,
-  Body,
-  Patch,
-  Param,
-  UseGuards,
-  Delete,
-} from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UpdateUserDto } from './dtos/update-user.dto';
-import { AuthGuard } from 'src/guards/auth-guard.guard';
-import { AdminGuard } from 'src/guards/admin.guard';
-import { UpdateUserActivity } from './dtos/update-user-activity';
+import { MessagePattern } from '@nestjs/microservices';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(AdminGuard)
-  @Get()
+  @MessagePattern({ cmd: 'user-list' })
   findAll() {
     return this.userService.findAll();
   }
-  @UseGuards(AdminGuard)
-  @Get(':id')
-  findOne(@Param('id') id: string) {
+  @MessagePattern({ cmd: 'user.findOne' })
+  findOne(id: string) {
     return this.userService.findOne(+id);
   }
 
-  @UseGuards(AdminGuard)
-  @Delete(':id')
-  deleteOne(@Param('id') id: string) {
+  @MessagePattern({ cmd: 'user.removeOne' })
+  deleteOne(id: string) {
     return this.userService.removeOne(+id);
   }
 
-  @UseGuards(AdminGuard)
-  @Patch('update-activity/:id')
-  updateActivity(
-    @Param('id') id: string,
-    @Body() updateUserActivityDto: UpdateUserActivity,
-  ) {
+  @MessagePattern({ cmd: 'user.updateActivity' })
+  updateActivity({ id, updateUserActivityDto }) {
     return this.userService.updateActivity(+id, updateUserActivityDto);
   }
 
-  @UseGuards(AuthGuard)
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  @MessagePattern({ cmd: 'user.updateOne' })
+  update({ id, updateUserDto }) {
     return this.userService.update(+id, updateUserDto);
   }
 }

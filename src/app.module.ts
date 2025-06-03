@@ -43,6 +43,13 @@ const cookieSession = require('cookie-session');
         options: { host: 'localhost', port: 3002 },
       },
     ]),
+    ClientsModule.register([
+      {
+        name: 'USER_SERVICE',
+        transport: Transport.TCP,
+        options: { host: 'localhost', port: 3003 },
+      },
+    ]),
     UserModule,
     BookModule,
     AuthModule,

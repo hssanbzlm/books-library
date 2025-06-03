@@ -23,10 +23,12 @@ import { QueryBookDto } from './book/dto/query-book.dto';
 import { CreateUserDto } from './auth/dtos/create-user.dto';
 import { SigninUserDto } from './auth/dtos/signin-user.dto';
 import { User } from './common/entities/user.entity';
-import { currentUser } from './decorators/current-user/current-user.decorator';
+import { currentUser } from './common/decorators/current-user/current-user.decorator';
 import { AuthGuard } from './guards/auth-guard.guard';
 import { lastValueFrom } from 'rxjs';
 import { plainToInstance } from 'class-transformer';
+import { UpdateUserActivity } from './user/dtos/update-user-activity';
+import { UpdateUserDto } from './user/dtos/update-user.dto';
 
 @Controller()
 export class AppController {
@@ -84,7 +86,7 @@ export class AppController {
   signup(@Body() body: CreateUserDto) {
     return this.appService.signup(body);
   }
-  
+
   @Post('auth/signin')
   async signin(
     @Body() { email, password }: SigninUserDto,
@@ -95,7 +97,7 @@ export class AppController {
     );
     // with plainToInstance used explicitly, there is no need to use classSerializeInterceptor
     // returned result will automatically apply @exclude on password
-    const userInstance = plainToInstance(User,user);
+    const userInstance = plainToInstance(User, user);
     session.userId = user.id;
     return userInstance;
   }
@@ -108,12 +110,47 @@ export class AppController {
   @UseGuards(AuthGuard)
   @Get('auth/whoami')
   async whoami(@currentUser() user: User) {
-    const authUser= await lastValueFrom(this.appService.whoami(user));
-    const plainAuthUser = plainToInstance(User,authUser);
+    const authUser = await lastValueFrom(this.appService.whoami(user));
+    const plainAuthUser = plainToInstance(User, authUser);
     return plainAuthUser;
   }
   @Get()
   usersList() {
     return this.appService.userList();
+  }
+
+  @UseGuards(AdminGuard)
+  @Get('user')
+  findAll() {
+    return this.appService.findAllUser();
+  }
+  @UseGuards(AdminGuard)
+  @Get('user/:id')
+  findOneUser(@Param('id') id: string) {
+    return this.appService.findOne(+id);
+  }
+
+  @UseGuards(AdminGuard)
+  @Delete('user/:id')
+  deleteOne(@Param('id') id: string) {
+    return this.appService.removeOneUser(+id);
+  }
+
+  @UseGuards(AdminGuard)
+  @Patch('user/update-activity/:id')
+  updateActivity(
+    @Param('id') id: string,
+    @Body() updateUserActivityDto: UpdateUserActivity,
+  ) {
+    return this.appService.updateUserActivity({
+      id: +id,
+      updateUserActivityDto,
+    });
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('user/:id')
+  updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.appService.updateUser({ id: +id, updateUserDto });
   }
 }

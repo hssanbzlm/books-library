@@ -10,7 +10,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { User } from 'src/common/entities/user.entity';
-import { currentUser } from 'src/decorators/current-user/current-user.decorator';
+import { currentUser } from 'src/common/decorators/current-user/current-user.decorator';
 import { AuthGuard } from 'src/guards/auth-guard.guard';
 import { BorrowBookDto } from './dto/borrow-book.dto';
 import { UserToBookService } from './user-to-book.service';
