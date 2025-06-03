@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
 import { BorrowNotificationService } from 'src/notifications/borrow-notification.service';
 import { UpdateNotifSeenDto } from 'src/book/dto/update-notif-seen.dto';
 import { currentUser } from 'src/decorators/current-user/current-user.decorator';
-import { User } from 'src/user/entities/user.entity';
+import { User } from 'src/common/entities/user.entity';
 
 @Controller('notifications')
 export class NotificationsController {

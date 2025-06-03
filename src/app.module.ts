@@ -7,7 +7,7 @@ import {
 import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './user/entities/user.entity';
+import { User } from './common/entities/user.entity';
 import { APP_PIPE } from '@nestjs/core';
 import { Book } from './book/entities/book.entity';
 import { UserToBook } from './book/entities/userToBook';
@@ -20,6 +20,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
 import { BookModule } from './book/book.module';
+import { AuthModule } from './auth/auth.module';
 
 const cookieSession = require('cookie-session');
 
@@ -35,8 +36,16 @@ const cookieSession = require('cookie-session');
         },
       },
     ]),
+    ClientsModule.register([
+      {
+        name: 'AUTH_SERVICE',
+        transport: Transport.TCP,
+        options: { host: 'localhost', port: 3002 },
+      },
+    ]),
     UserModule,
     BookModule,
+    AuthModule,
     EventEmitterModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,

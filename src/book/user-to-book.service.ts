@@ -12,9 +12,8 @@ import {
 import { Repository } from 'typeorm';
 import { Book } from './entities/book.entity';
 import { BorrowBookDto } from './dto/borrow-book.dto';
-import { User } from 'src/user/entities/user.entity';
+import { User } from 'src/common/entities/user.entity';
 import * as moment from 'moment';
-import { instanceToPlain } from 'class-transformer';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UpdateUserBorrowDto } from './dto/update-user-borrow.dto';
 import { CancelBorrowDto } from './dto/cancel-borrow.dto';
@@ -348,9 +347,7 @@ export class UserToBookService {
         },
       },
     });
-
-    return instanceToPlain(
-      userToBook
+  return userToBook
         .sort((a, b) => (a.createdDate <= b.createdDate ? 1 : -1))
         .map((userToBook) => ({
           createdDate: userToBook.createdDate,
@@ -364,7 +361,6 @@ export class UserToBookService {
           bookTitle: userToBook.book.title,
           endDate: userToBook.endDate,
           startDate: userToBook.startDate,
-        })),
-    );
+        }))
   }
 }

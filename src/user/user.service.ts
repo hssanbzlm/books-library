@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/user/entities/user.entity';
+import { User } from 'src/common/entities/user.entity';
 import { Repository } from 'typeorm';
 import { UpdateUserActivity } from './dtos/update-user-activity';
 import { instanceToPlain } from 'class-transformer';
@@ -29,7 +29,7 @@ export class UserService {
       id,
       active: updateUserActivity.active,
     });
-    return instanceToPlain(user);
+    return user;
   }
 
   async removeOne(id: number) {

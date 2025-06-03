@@ -9,7 +9,7 @@ import {
   Param,
   Put,
 } from '@nestjs/common';
-import { User } from 'src/user/entities/user.entity';
+import { User } from 'src/common/entities/user.entity';
 import { currentUser } from 'src/decorators/current-user/current-user.decorator';
 import { AuthGuard } from 'src/guards/auth-guard.guard';
 import { BorrowBookDto } from './dto/borrow-book.dto';

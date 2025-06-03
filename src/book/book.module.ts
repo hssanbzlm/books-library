@@ -4,7 +4,7 @@ import { BookController } from './book.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Book } from './entities/book.entity';
 import { UserToBook } from './entities/userToBook';
-import { User } from 'src/user/entities/user.entity';
+import { User } from 'src/common/entities/user.entity';
 import { BorrowReminderService } from 'src/tasks/borrow-reminder/borrow-reminder.service';
 import { UserToBookService } from './user-to-book.service';
 import { UserToBookController } from './user-to-book.contoller';
