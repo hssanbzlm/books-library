@@ -1,0 +1,45 @@
+type User {
+  id: ID!
+  name: String!
+  lastName: String!
+  email: String!
+  active: Boolean!
+  admin: Boolean
+}
+type Book {
+  id: ID!
+  title: String!
+  numberOfPages: Int!
+  edition: String!
+  synopsis: String!
+  year: Int
+  category: String!
+  quantity: Int!
+  coverPath: String
+  authors: [String!]!
+  embedding: [Float]
+}
+type UserToBook {
+  userToBookId: ID!
+  createdDate: String!
+  userId: ID!
+  bookId: ID!
+  startDate: String!
+  endDate: String!
+  status: String!
+  receiverRole: String!
+  receiverSeen: Boolean!
+}
+
+type Query {
+  users: [User!]!
+  user(id: ID): User
+  books: [Book!]!
+  book(id: ID): Book
+  borrowList:[UserToBook]!
+  whoami:User
+}
+
+type Mutation {
+  login(email:String!,password:String!):Boolean
+}

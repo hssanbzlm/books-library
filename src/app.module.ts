@@ -12,6 +12,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { NotificationsModule } from './notifications/notifications.module';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver } from '@nestjs/apollo';
 
 const cookieSession = require('cookie-session');
 
@@ -36,6 +38,7 @@ const cookieSession = require('cookie-session');
       }),
     }),
     TypeOrmModule.forFeature([User, Book, UserToBook]),
+    GraphQLModule.forRoot({typePaths:['./**/*.graphql'],driver:ApolloDriver,context:({req,res})=>({req,res})}),
     MailerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
