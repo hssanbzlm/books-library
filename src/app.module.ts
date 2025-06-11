@@ -1,9 +1,11 @@
-import { MiddlewareConsumer, Module, NestModule, ValidationPipe } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+} from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user/entities/user.entity';
-import { APP_PIPE } from '@nestjs/core';
 import { BookModule } from './book/book.module';
 import { Book } from './book/entities/book.entity';
 import { UserToBook } from './book/entities/userToBook';
@@ -12,6 +14,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { NotificationsModule } from './notifications/notifications.module';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver } from '@nestjs/apollo';
 
 const cookieSession = require('cookie-session');
 
@@ -36,6 +40,10 @@ const cookieSession = require('cookie-session');
       }),
     }),
     TypeOrmModule.forFeature([User, Book, UserToBook]),
+    GraphQLModule.forRoot({
+      typePaths: ['./**/*.graphql'],
+      driver: ApolloDriver,
+    }),
     MailerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -51,14 +59,6 @@ const cookieSession = require('cookie-session');
     }),
     ScheduleModule.forRoot(),
     NotificationsModule,
-  ],
-  providers: [
-    {
-      provide: APP_PIPE,
-      useValue: new ValidationPipe({
-        whitelist: true,
-      }),
-    },
   ],
 })
 export class AppModule {

@@ -7,6 +7,7 @@ import { Repository, Like } from 'typeorm';
 import { QueryBookDto } from './dto/query-book.dto';
 import { CloudinaryService } from 'src/cloudinary/service/cloudinary/cloudinary.service';
 import { BookRecommendService } from './book-recommend.service';
+import { FileUpload } from 'graphql-upload';
 
 @Injectable()
 export class BookService {
@@ -16,12 +17,17 @@ export class BookService {
     private bookRecommendService: BookRecommendService,
   ) {}
 
-  async create(createBookDto: CreateBookDto, cover: Express.Multer.File) {
+  async create(
+    createBookDto: CreateBookDto,
+    cover: FileUpload | Express.Multer.File,
+  ) {
     let uploadedFile = null;
-    if (cover) {
-      uploadedFile = await this.cloudinaryService.uploadFile(cover);
-      createBookDto.coverPath = uploadedFile.secure_url;
-    }
+    uploadedFile = await this.cloudinaryService.uploadStreamFile(
+      cover as FileUpload,
+    );
+
+    createBookDto.coverPath = uploadedFile.secure_url;
+
     const bookVector = await this.bookRecommendService.generateBookEmbedding(
       `authors: ${createBookDto.authors.join('')}\ntitle: ${createBookDto.title}\ncategory:${createBookDto.category}\nsynopsis: ${createBookDto.synopsis}`,
     );
@@ -47,7 +53,7 @@ export class BookService {
   async update(
     id: number,
     updateBookDto: UpdateBookDto,
-    cover: Express.Multer.File,
+    cover: Express.Multer.File | FileUpload,
   ) {
     const book = await this.bookRepo.findOneBy({ id });
     if (!book) throw new NotFoundException('This book does not exist');
@@ -55,11 +61,11 @@ export class BookService {
     let oldFile = null;
     if (cover) {
       oldFile = book.coverPath;
-      uploadedFile = await this.cloudinaryService.uploadFile(cover);
+      uploadedFile = await this.cloudinaryService.uploadStreamFile(cover);
       updateBookDto.coverPath = uploadedFile.secure_url;
     }
 
-    await this.bookRepo.save({ id, ...updateBookDto });
+    await this.bookRepo.update({ id }, { ...updateBookDto });
     const updatedBook = await this.bookRepo.findOneBy({ id });
 
     if (oldFile) await this.cloudinaryService.removeFile(oldFile);

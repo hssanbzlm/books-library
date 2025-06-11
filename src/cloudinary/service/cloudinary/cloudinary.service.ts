@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { v2 as cloudinary } from 'cloudinary';
+import { FileUpload } from 'graphql-upload';
 
 @Injectable()
 export class CloudinaryService {
@@ -9,6 +10,22 @@ export class CloudinaryService {
     return cloudinary.uploader.upload(dataURI, {
       resource_type: 'image',
       folder: 'book-store',
+    });
+  }
+
+  async uploadStreamFile(file: any) {
+    const { createReadStream, filename} = file.file;
+    const stream = createReadStream();
+
+    return new Promise((resolve, reject) => {
+      const cloudinaryStream = cloudinary.uploader.upload_stream(
+        { resource_type: 'image', folder: 'book-store', public_id: filename },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        },
+      );
+      stream.pipe(cloudinaryStream);
     });
   }
 

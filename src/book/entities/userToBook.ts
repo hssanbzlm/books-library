@@ -9,7 +9,7 @@ import {
 import { Book } from './book.entity';
 export type statusState =
   | 'Pending'
-  | 'Checked-out'
+  | 'Checkedout'
   | 'Refused'
   | 'Accepted'
   | 'Damaged'
@@ -19,7 +19,7 @@ export type statusState =
   | 'Canceled';
 export enum status {
   Pending = 'Pending',
-  CheckedOut = 'Checked-out',
+  CheckedOut = 'Checkedout',
   Refused = 'Refused',
   Accepted = 'Accepted',
   Damaged = 'Damaged',

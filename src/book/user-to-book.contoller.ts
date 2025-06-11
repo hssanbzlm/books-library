@@ -21,9 +21,7 @@ import { CancelBorrowDto } from './dto/cancel-borrow.dto';
 
 @Controller('user-to-book')
 export class UserToBookController {
-  constructor(
-    private userToBookService: UserToBookService,
-  ) {}
+  constructor(private userToBookService: UserToBookService) {}
 
   @UseGuards(AuthGuard)
   @Get()
@@ -41,10 +39,10 @@ export class UserToBookController {
   @UseGuards(AdminGuard)
   @Patch('borrow-status')
   updateBorrowStatus(@Body() body: UpdateBorrowBookDto) {
-    return this.userToBookService.updateBorrowStatus(
-      body.borrowId,
-      body.status,
-    );
+    return this.userToBookService.updateBorrowStatus({
+      borrowId: body.borrowId,
+      status: body.status,
+    });
   }
 
   @Get('is-ready-to-borrow/:bookId')

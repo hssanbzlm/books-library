@@ -1,8 +1,9 @@
 import { Type } from 'class-transformer';
-import { IsDate, IsNumber } from 'class-validator';
+import { IsDate, IsInt } from 'class-validator';
 
 export class BorrowBookDto {
-  @IsNumber()
+  @Type(()=>Number)
+  @IsInt()
   idBook: number;
   @Type(() => Date)
   @IsDate()
