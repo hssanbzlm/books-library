@@ -25,7 +25,7 @@ import { BookResolver } from './book.resolver';
     BorrowReminderService,
     UserToBookService,
     BookRecommendService,
-    BookResolver
+    BookResolver,
   ],
 })
 export class BookModule {}

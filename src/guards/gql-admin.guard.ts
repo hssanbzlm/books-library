@@ -7,7 +7,7 @@ export class AdminAuthGuard implements CanActivate {
     const ctx = GqlExecutionContext.create(context);
     const req = ctx.getContext().req;
 
-    if (req.currentUser && req.currentUser.admin) {
+    if (req?.currentUser?.admin) {
       return true;
     }
 

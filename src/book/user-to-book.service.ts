@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -18,6 +19,7 @@ import { instanceToPlain } from 'class-transformer';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UpdateUserBorrowDto } from './dto/update-user-borrow.dto';
 import { CancelBorrowDto } from './dto/cancel-borrow.dto';
+import { UpdateBorrowBookDto } from './dto/update-borrow-book.dto';
 
 @Injectable()
 export class UserToBookService {
@@ -61,12 +63,13 @@ export class UserToBookService {
     }
   }
 
-  async updateBorrowStatus(borrowId: number, status: statusState) {
+  async updateBorrowStatus({ borrowId, status }: UpdateBorrowBookDto) {
     const userToBook = await this.userToBookRepo.findOne({
       where: { userToBookId: borrowId },
       relations: { book: true, user: true },
       select: {
         userToBookId: true,
+        createdDate: true,
         startDate: true,
         endDate: true,
         status: true,
@@ -113,12 +116,12 @@ export class UserToBookService {
             );
         },
       );
-    } else return 'same status';
-
-    this.eventEmitter.emit('userNotif.userToBook.changes', {
+    } else throw new ConflictException('Same status');
+    const result = {
       userToBookId: newUserToBook.userToBookId,
       status: newUserToBook.status,
       userId: newUserToBook.user.id,
+      createdDate:newUserToBook.createdDate,
       userName: newUserToBook.user.name,
       userLastName: newUserToBook.user.lastName,
       bookId: newUserToBook.book.id,
@@ -128,11 +131,9 @@ export class UserToBookService {
       receiverRole: newUserToBook.receiverRole,
       receiverSeen: newUserToBook.receiverSeen,
       email: newUserToBook.user.email,
-    });
-
-    return await this.getBorrowList({
-      userToBookId: newUserToBook.userToBookId,
-    });
+    };
+    this.eventEmitter.emit('userNotif.userToBook.changes', result);
+    return result;
   }
 
   async updateUserBorrow({
@@ -150,6 +151,7 @@ export class UserToBookService {
         startDate: true,
         endDate: true,
         status: true,
+        createdDate: true,
         receiverSeen: true,
         user: {
           id: true,
@@ -179,6 +181,7 @@ export class UserToBookService {
     });
     return {
       userToBookId: userToBook.userToBookId,
+      createdDate: userToBook.createdDate,
       status: userToBook.status,
       userId: userToBook.user.id,
       userName: userToBook.user.name,
@@ -198,6 +201,7 @@ export class UserToBookService {
       },
       relations: { book: true, user: true },
       select: {
+        createdDate: true,
         userToBookId: true,
         startDate: true,
         endDate: true,
@@ -231,6 +235,7 @@ export class UserToBookService {
     });
     return {
       userToBookId: userToBook.userToBookId,
+      createdDate: userToBook.createdDate,
       status: updated.status,
       userId: userToBook.user.id,
       userName: userToBook.user.name,

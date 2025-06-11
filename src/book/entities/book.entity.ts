@@ -56,7 +56,7 @@ export class Book {
   numberOfPages: number;
   @Column()
   edition: string;
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   synopsis: string;
   @Column({ nullable: true })
   year: number;
