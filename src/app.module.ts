@@ -16,6 +16,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { NotificationsModule } from './notifications/notifications.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver } from '@nestjs/apollo';
+import { Notification } from './notifications/entities/notification.entity';
 
 const cookieSession = require('cookie-session');
 
@@ -35,11 +36,11 @@ const cookieSession = require('cookie-session');
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         port: config.get<number>('DB_PORT'),
-        entities: [User, Book, UserToBook],
+        entities: [User, Book, UserToBook,Notification],
         synchronize: true,
       }),
     }),
-    TypeOrmModule.forFeature([User, Book, UserToBook]),
+    TypeOrmModule.forFeature([User, Book, UserToBook,Notification]),
     GraphQLModule.forRoot({
       typePaths: ['./**/*.graphql'],
       driver: ApolloDriver,

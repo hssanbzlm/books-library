@@ -76,8 +76,8 @@ export class BookResolver {
   }
   @UseGuards(AdminAuthGuard)
   @Mutation('updateBorrow')
-  updateBorrow(@Args('borrowUpdate') borrowUpdate:UpdateBorrowBookDto){
-    return this.userToBookService.updateBorrowStatus(borrowUpdate)
+  updateBorrow(@Args('borrowUpdate') borrowUpdate:UpdateBorrowBookDto,@currentUser() user){
+    return this.userToBookService.updateBorrowStatus(borrowUpdate,user)
   }
 
   @UseGuards(AuthGuard)

@@ -24,17 +24,10 @@ export class NotificationsController {
     return this.borrowNotificationService.subscribeForUserNotification(userId);
   }
 
-  @Sse('borrow-notification/admin-notif/:adminId')
-  getAdminBorrowNotification(): Observable<any> {
-    return this.borrowNotificationService.subscribeForAdminNotification();
-  }
-
   @Get()
   getMissedNotification(@currentUser() currentUser: User) {
-    const userRole = currentUser.admin ? 'admin' : 'user';
     return this.borrowNotificationService.getNotificationsStatus(
       currentUser.id,
-      userRole,
     );
   }
 

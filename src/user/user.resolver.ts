@@ -1,6 +1,6 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UserService } from './user.service';
-import { UseGuards } from '@nestjs/common';
+import { ParseIntPipe, UseGuards } from '@nestjs/common';
 import { AdminAuthGuard } from 'src/guards/gql-admin.guard';
 import { AuthGuard } from 'src/guards/gql-auth.guard';
 
@@ -21,7 +21,7 @@ export class UserResolver {
 
   @UseGuards(AdminAuthGuard)
   @Mutation('deleteUser')
-  deleteUser(id: number) {
+  deleteUser(@Args('id',ParseIntPipe) id: number) {
     return this.userService.removeOne(id);
   }
 

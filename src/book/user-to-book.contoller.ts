@@ -38,11 +38,11 @@ export class UserToBookController {
 
   @UseGuards(AdminGuard)
   @Patch('borrow-status')
-  updateBorrowStatus(@Body() body: UpdateBorrowBookDto) {
+  updateBorrowStatus(@Body() body: UpdateBorrowBookDto, @currentUser() user:User) {
     return this.userToBookService.updateBorrowStatus({
       borrowId: body.borrowId,
       status: body.status,
-    });
+    },user);
   }
 
   @Get('is-ready-to-borrow/:bookId')

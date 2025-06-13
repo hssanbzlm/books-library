@@ -8,7 +8,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   UserToBook,
   status as borrowStatus,
-  statusState,
 } from './entities/userToBook';
 import { Repository } from 'typeorm';
 import { Book } from './entities/book.entity';
@@ -20,6 +19,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UpdateUserBorrowDto } from './dto/update-user-borrow.dto';
 import { CancelBorrowDto } from './dto/cancel-borrow.dto';
 import { UpdateBorrowBookDto } from './dto/update-borrow-book.dto';
+import { Notification } from 'src/notifications/entities/notification.entity';
 
 @Injectable()
 export class UserToBookService {
@@ -28,6 +28,8 @@ export class UserToBookService {
     private userToBookRepo: Repository<UserToBook>,
     @InjectRepository(Book) private bookReposistory: Repository<Book>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Notification)
+    private notificationRepository: Repository<Notification>,
     private eventEmitter: EventEmitter2,
   ) {}
 
@@ -63,7 +65,10 @@ export class UserToBookService {
     }
   }
 
-  async updateBorrowStatus({ borrowId, status }: UpdateBorrowBookDto) {
+  async updateBorrowStatus(
+    { borrowId, status }: UpdateBorrowBookDto,
+    user: User,
+  ) {
     const userToBook = await this.userToBookRepo.findOne({
       where: { userToBookId: borrowId },
       relations: { book: true, user: true },
@@ -73,7 +78,6 @@ export class UserToBookService {
         startDate: true,
         endDate: true,
         status: true,
-        receiverSeen: true,
         user: {
           id: true,
           email: true,
@@ -92,8 +96,6 @@ export class UserToBookService {
     const newUserToBook = {
       ...userToBook,
       status,
-      receiverSeen: false,
-      receiverRole: 'user',
     };
     if (userToBook.status != status) {
       await this.bookReposistory.manager.transaction(
@@ -117,23 +119,27 @@ export class UserToBookService {
         },
       );
     } else throw new ConflictException('Same status');
-    const result = {
-      userToBookId: newUserToBook.userToBookId,
-      status: newUserToBook.status,
-      userId: newUserToBook.user.id,
-      createdDate:newUserToBook.createdDate,
-      userName: newUserToBook.user.name,
-      userLastName: newUserToBook.user.lastName,
-      bookId: newUserToBook.book.id,
-      bookTitle: newUserToBook.book.title,
-      endDate: newUserToBook.endDate,
-      startDate: newUserToBook.startDate,
-      receiverRole: newUserToBook.receiverRole,
-      receiverSeen: newUserToBook.receiverSeen,
-      email: newUserToBook.user.email,
+    const notification = {
+      sender: user,
+      receiver: userToBook.user,
+      message: `Your borrow request for ${userToBook.book.title} is in ${status} state`,
     };
-    this.eventEmitter.emit('userNotif.userToBook.changes', result);
-    return result;
+    const savedNotif = await this.notificationRepository.save(notification);
+
+    this.eventEmitter.emit('userNotif.userToBook.changes', savedNotif);
+    return  {
+      userToBookId: userToBook.userToBookId,
+      createdDate: userToBook.createdDate,
+      status: status,
+      userId: userToBook.user.id,
+      userName: userToBook.user.name,
+      userLastName: userToBook.user.lastName,
+      email: userToBook.user.email,
+      bookId: userToBook.book.id,
+      bookTitle: userToBook.book.title,
+      endDate: userToBook.endDate,
+      startDate: userToBook.startDate,
+    };
   }
 
   async updateUserBorrow({
@@ -152,7 +158,6 @@ export class UserToBookService {
         endDate: true,
         status: true,
         createdDate: true,
-        receiverSeen: true,
         user: {
           id: true,
           email: true,
@@ -174,8 +179,6 @@ export class UserToBookService {
       userId: userToBook.userId,
       bookId: userToBook.bookId,
       status: userToBook.status,
-      receiverRole: userToBook.receiverRole,
-      receiverSeen: userToBook.receiverSeen,
       startDate,
       endDate,
     });
@@ -191,7 +194,6 @@ export class UserToBookService {
       bookTitle: userToBook.book.title,
       endDate: updated.endDate,
       startDate: updated.startDate,
-      receiverSeen: userToBook.receiverSeen,
     };
   }
   async CancelUserBorrow({ borrowId }: CancelBorrowDto) {
@@ -206,7 +208,6 @@ export class UserToBookService {
         startDate: true,
         endDate: true,
         status: true,
-        receiverSeen: true,
         user: {
           id: true,
           email: true,
@@ -222,14 +223,24 @@ export class UserToBookService {
     if (!userToBook || userToBook.status != 'Pending') {
       throw new NotFoundException('Canceling is not possible');
     }
+    const notifReceiver = await this.userRepository.findOne({
+      where: { admin: true },
+    });
+    const notification = {
+      receiver: notifReceiver,
+      sender: userToBook.user,
+      message: `The borrow request for ${userToBook.book.title} has been canceled`,
+    };
+    const savedNotification =
+      await this.notificationRepository.save(notification);
+
+    this.eventEmitter.emit('userNotif.userToBook.changes', savedNotification);
 
     const updated = await this.userToBookRepo.save({
       userToBookId: userToBook.userToBookId,
       userId: userToBook.userId,
       bookId: userToBook.bookId,
       status: 'Canceled',
-      receiverRole: userToBook.receiverRole,
-      receiverSeen: userToBook.receiverSeen,
       startDate: userToBook.startDate,
       endDate: userToBook.endDate,
     });
@@ -245,7 +256,6 @@ export class UserToBookService {
       bookTitle: userToBook.book.title,
       endDate: userToBook.endDate,
       startDate: userToBook.startDate,
-      receiverSeen: userToBook.receiverSeen,
     };
   }
 
@@ -267,7 +277,6 @@ export class UserToBookService {
             startDate,
             endDate,
             status: borrowStatus.Pending,
-            receiverRole: 'admin',
           });
           userToBook = await transactionalEntityManager.save(UserToBook, {
             ...detailBorrow,
@@ -282,20 +291,14 @@ export class UserToBookService {
         },
       );
     } else throw new NotFoundException('Resources not found');
-    this.eventEmitter.emit('adminNotif.userToBook.changes', {
-      userToBookId: userToBook.userToBookId,
-      status: userToBook.status,
-      userId: userToBook.userId,
-      userName: userToBook.user.name,
-      userLastName: userToBook.user.lastName,
-      bookId: userToBook.bookId,
-      bookTitle: userToBook.book.title,
-      endDate: userToBook.endDate,
-      startDate: userToBook.startDate,
-      receiverRole: userToBook.receiverRole,
-      receiverSeen: userToBook.receiverSeen,
-      email: userToBook.user.email,
-    });
+    const admin = await this.userRepository.findOne({ where: { admin: true } });
+    const notification = {
+      receiver: admin,
+      sender: userToBook.user,
+      message: `${userToBook.user.name} has asked to borrow ${book.title}`,
+    };
+    const savedNotification = await this.notificationRepository.save(notification);
+    this.eventEmitter.emit('userNotif.userToBook.changes', savedNotification);
     return book;
   }
   async borrowList() {

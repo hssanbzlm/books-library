@@ -1,89 +1,52 @@
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { filter, Subject } from 'rxjs';
-import { UserToBook } from '../book/entities/userToBook';
-import { In, Not, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Notification } from './entities/notification.entity';
 
 @Injectable()
 export class BorrowNotificationService {
-  userNotifcations$ = new Subject<{ data: UserToBook }>();
-  adminNotifications$ = new Subject<{ data: UserToBook }>();
+  userNotifcations$ = new Subject<{ data: Notification }>();
   constructor(
-    @InjectRepository(UserToBook)
-    private userToBookRepository: Repository<UserToBook>,
+    @InjectRepository(Notification)
+    private notificationRepository: Repository<Notification>,
   ) {}
   @OnEvent('userNotif.userToBook.changes')
-  private userNotifChanges(payload: UserToBook) {
+  private userNotifChanges(payload: Notification) {
     this.userNotifcations$.next({ data: payload });
-  }
-
-  @OnEvent('adminNotif.userToBook.changes')
-  private adminNotifChanges(payload: UserToBook) {
-    this.adminNotifications$.next({ data: payload });
   }
 
   public subscribeForUserNotification(userId: number) {
     return this.userNotifcations$.pipe(
-      filter(({ data }) => data.userId == userId),
+      filter(({ data }) => data.receiver.id == userId),
     );
   }
 
-  public subscribeForAdminNotification() {
-    return this.adminNotifications$.pipe(
-      filter(({ data }) => data.receiverRole == 'admin'),
-    );
-  }
-  public async getNotificationsStatus(userId: number, role: 'admin' | 'user') {
-    const notifList = await this.userToBookRepository.find({
+  public async getNotificationsStatus(userId: number) {
+    const notifList = await this.notificationRepository.find({
       where: {
-        ...(role == 'user' && { userId }),
-        receiverRole: role,
-        receiverSeen: false,
+        receiver: { id: userId },
       },
-      relations: { book: true, user: true },
       select: {
-        userToBookId: true,
-        startDate: true,
-        endDate: true,
-        status: true,
+        message: true,
+        date: true,
         receiverSeen: true,
-        user: {
-          id: true,
-          email: true,
-          name: true,
-          lastName: true,
-        },
-        book: {
-          id: true,
-          title: true,
-        },
+        id:true,
       },
     });
-    return notifList.map((userToBook) => ({
-      userToBookId: userToBook.userToBookId,
-      status: userToBook.status,
-      userId: userToBook.user.id,
-      userName: userToBook.user.name,
-      userLastName: userToBook.user.lastName,
-      email: userToBook.user.email,
-      bookId: userToBook.book.id,
-      bookTitle: userToBook.book.title,
-      endDate: userToBook.endDate,
-      startDate: userToBook.startDate,
-      receiverSeen: userToBook.receiverSeen,
-    }));
+    return notifList;
   }
 
   async notificationSeen(notifications: number[]) {
     try {
-      const result = await this.userToBookRepository
+      const result = await this.notificationRepository
         .createQueryBuilder()
         .update()
         .set({
           receiverSeen: true,
         })
-        .where({ userToBookId: In(notifications) })
+        .where({ id: In(notifications) })
         .execute();
       return result;
     } catch (e) {}
