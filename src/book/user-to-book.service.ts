@@ -5,21 +5,19 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  UserToBook,
-  status as borrowStatus,
-} from './entities/userToBook';
+import { UserToBook, status as borrowStatus } from './entities/userToBook';
 import { Repository } from 'typeorm';
 import { Book } from './entities/book.entity';
 import { BorrowBookDto } from './dto/borrow-book.dto';
 import { User } from 'src/user/entities/user.entity';
 import * as moment from 'moment';
-import { instanceToPlain } from 'class-transformer';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UpdateUserBorrowDto } from './dto/update-user-borrow.dto';
 import { CancelBorrowDto } from './dto/cancel-borrow.dto';
 import { UpdateBorrowBookDto } from './dto/update-borrow-book.dto';
 import { Notification } from 'src/notifications/entities/notification.entity';
+import { BorrowNotificationService } from 'src/notifications/borrow-notification.service';
 
 @Injectable()
 export class UserToBookService {
@@ -30,6 +28,7 @@ export class UserToBookService {
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Notification)
     private notificationRepository: Repository<Notification>,
+    private notificationService: BorrowNotificationService,
     private eventEmitter: EventEmitter2,
   ) {}
 
@@ -126,8 +125,8 @@ export class UserToBookService {
     };
     const savedNotif = await this.notificationRepository.save(notification);
 
-    this.eventEmitter.emit('userNotif.userToBook.changes', savedNotif);
-    return  {
+    this.notificationService.sendToUser(notification.receiver.id, plainToInstance(Notification,savedNotif));
+    return {
       userToBookId: userToBook.userToBookId,
       createdDate: userToBook.createdDate,
       status: status,
@@ -234,7 +233,10 @@ export class UserToBookService {
     const savedNotification =
       await this.notificationRepository.save(notification);
 
-    this.eventEmitter.emit('userNotif.userToBook.changes', savedNotification);
+    this.notificationService.sendToUser(
+      savedNotification.receiver.id,
+      plainToInstance(Notification,savedNotification),
+    );
 
     const updated = await this.userToBookRepo.save({
       userToBookId: userToBook.userToBookId,
@@ -297,8 +299,12 @@ export class UserToBookService {
       sender: userToBook.user,
       message: `${userToBook.user.name} has asked to borrow ${book.title}`,
     };
-    const savedNotification = await this.notificationRepository.save(notification);
-    this.eventEmitter.emit('userNotif.userToBook.changes', savedNotification);
+    const savedNotification =
+      await this.notificationRepository.save(notification);
+    this.notificationService.sendToUser(
+      savedNotification.receiver.id,
+      plainToInstance(Notification,savedNotification),
+    );
     return book;
   }
   async borrowList() {

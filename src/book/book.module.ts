@@ -13,12 +13,14 @@ import { HttpModule } from '@nestjs/axios';
 import { BookRecommendService } from './book-recommend.service';
 import { BookResolver } from './book.resolver';
 import { Notification } from 'src/notifications/entities/notification.entity';
+import { NotificationsModule } from 'src/notifications/notifications.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Book, User, UserToBook,Notification]),
     CloudinaryModule,
     HttpModule,
+    NotificationsModule
   ],
   controllers: [BookController, UserToBookController],
   providers: [

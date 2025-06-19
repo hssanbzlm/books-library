@@ -9,5 +9,6 @@ import { Notification } from './entities/notification.entity';
   imports: [TypeOrmModule.forFeature([UserToBook,Notification])],
   controllers: [NotificationsController],
   providers: [BorrowNotificationService],
+  exports:[BorrowNotificationService]
 })
 export class NotificationsModule {}

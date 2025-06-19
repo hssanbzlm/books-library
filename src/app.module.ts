@@ -17,6 +17,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver } from '@nestjs/apollo';
 import { Notification } from './notifications/entities/notification.entity';
+import { RedisModule } from './redis/redis.module';
 
 const cookieSession = require('cookie-session');
 
@@ -60,6 +61,7 @@ const cookieSession = require('cookie-session');
     }),
     ScheduleModule.forRoot(),
     NotificationsModule,
+    RedisModule,
   ],
 })
 export class AppModule {

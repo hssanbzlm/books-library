@@ -1,26 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
-import { filter, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Notification } from './entities/notification.entity';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class BorrowNotificationService {
-  userNotifcations$ = new Subject<{ data: Notification }>();
   constructor(
     @InjectRepository(Notification)
     private notificationRepository: Repository<Notification>,
+    private redisService:RedisService
   ) {}
-  @OnEvent('userNotif.userToBook.changes')
-  private userNotifChanges(payload: Notification) {
-    this.userNotifcations$.next({ data: payload });
+ 
+   async sendToUser(userId: number, notification: any) {
+    await this.redisService.publish(`user:${userId}`, notification);
   }
 
-  public subscribeForUserNotification(userId: number) {
-    return this.userNotifcations$.pipe(
-      filter(({ data }) => data.receiver.id == userId),
-    );
+  listenToUser(userId: number): Observable<any> {
+    return new Observable((observer) => {
+      const channel = `user:${userId}`;
+      this.redisService.subscribe(channel, (message) => {
+        observer.next(message);
+      });
+    });
   }
 
   public async getNotificationsStatus(userId: number) {
