@@ -6,6 +6,7 @@ import { UserService } from './user.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Book } from 'src/book/entities/book.entity';
 import { UserToBook } from 'src/book/entities/userToBook';
+import { Notification } from '../notifications/entities/notification.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -19,11 +20,11 @@ import { UserToBook } from 'src/book/entities/userToBook';
             username: config.get<string>('DB_USERNAME'),
             password: config.get<string>('DB_PASSWORD'),
             port: config.get<number>('DB_PORT'),
-            entities: [User, Book, UserToBook],
+            entities: [User, Book, UserToBook,Notification],
             synchronize: true,
           }),
         }),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User,Notification]),
   ],
   controllers: [UserController],
   providers: [UserService],

@@ -1,12 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { graphqlUploadExpress } from "graphql-upload";
+import { ValidationPipe } from '@nestjs/common';
 import { Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({ credentials: true, origin: true });
-  app.useGlobalFilters(new HttpExceptionFilter());
+  app.use(graphqlUploadExpress({maxFileSize: 1000000, maxFiles: 1}))
+  app.useGlobalPipes(new ValidationPipe({transform:true,whitelist:true}))
 
   // I added this to be able to run microservice with monolotith app
   // otherwise, I need to run the microservice manually: npm run start:book-service

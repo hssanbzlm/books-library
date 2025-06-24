@@ -7,6 +7,7 @@ import { Book } from 'src/book/entities/book.entity';
 import { UserToBook } from 'src/book/entities/userToBook';
 import { User } from 'src/common/entities/user.entity';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { Notification } from 'src/notifications/entities/notification.entity';
 
 @Module({
   providers: [AuthService],
@@ -22,7 +23,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         port: config.get<number>('DB_PORT'),
-        entities: [User, Book, UserToBook],
+        entities: [User, Book, UserToBook,Notification],
         synchronize: true,
       }),
     }),

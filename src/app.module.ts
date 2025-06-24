@@ -16,11 +16,17 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { NotificationsModule } from './notifications/notifications.module';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver } from '@nestjs/apollo';
+import { Notification } from './notifications/entities/notification.entity';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
 import { BookModule } from './book/book.module';
 import { AuthModule } from './auth/auth.module';
+import { UserResolver } from './user/user.resolver';
+import { BookResolver } from './book/book.resolver';
+import { AuthResolver } from './user/auth.resolver';
 
 const cookieSession = require('cookie-session');
 
@@ -65,11 +71,15 @@ const cookieSession = require('cookie-session');
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         port: config.get<number>('DB_PORT'),
-        entities: [User, Book, UserToBook],
+        entities: [User, Book, UserToBook,Notification],
         synchronize: true,
       }),
     }),
-    TypeOrmModule.forFeature([User, Book, UserToBook]),
+    TypeOrmModule.forFeature([User, Book, UserToBook,Notification]),
+    GraphQLModule.forRoot({
+      typePaths: ['./**/*.graphql'],
+      driver: ApolloDriver,
+    }),
     MailerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -86,16 +96,8 @@ const cookieSession = require('cookie-session');
     ScheduleModule.forRoot(),
     NotificationsModule,
   ],
-  providers: [
-    {
-      provide: APP_PIPE,
-      useValue: new ValidationPipe({
-        whitelist: true,
-      }),
-    },
-    AppService,
-  ],
   controllers: [AppController],
+  providers:[UserResolver,BookResolver,AuthResolver,AppService]
 })
 export class AppModule {
   constructor(private configService: ConfigService) {}

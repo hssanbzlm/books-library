@@ -20,19 +20,16 @@ export class UserService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.userRepo.save({ id, ...updateUserDto });
+    const user = await this.userRepo.update({ id},{...updateUserDto});
     return instanceToPlain(user);
   }
 
   async updateActivity(id: number, updateUserActivity: UpdateUserActivity) {
-    const user = await this.userRepo.save({
-      id,
-      active: updateUserActivity.active,
-    });
-    return user;
+    const user = await this.userRepo.update({id},{active:updateUserActivity.active});
+    return instanceToPlain(user);
   }
 
-  async removeOne(id: number) {
+  async removeOne(id) {
     const user = await this.findOne(id);
     if (user) {
       const result = await this.userRepo.delete({ id });

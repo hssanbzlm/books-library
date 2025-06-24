@@ -10,6 +10,8 @@ import { UserToBookService } from './user-to-book.service';
 import { UserToBookController } from './user-to-book.contoller';
 import { HttpModule } from '@nestjs/axios';
 import { BookRecommendService } from './book-recommend.service';
+import { Notification } from 'src/notifications/entities/notification.entity';
+import { NotificationsModule } from 'src/notifications/notifications.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CloudinaryService } from './cloudinary.service';
 import { v2 as cloudinary } from 'cloudinary';
@@ -19,6 +21,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
+    NotificationsModule,
     EventEmitterModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
@@ -31,11 +34,11 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         port: config.get<number>('DB_PORT'),
-        entities: [User, Book, UserToBook],
+        entities: [User, Book, UserToBook,Notification],
         synchronize: true,
       }),
     }),
-    TypeOrmModule.forFeature([Book, User, UserToBook]),
+    TypeOrmModule.forFeature([Book, User, UserToBook,Notification]),
     HttpModule,
     MailerModule.forRootAsync({
       inject: [ConfigService],

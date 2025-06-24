@@ -9,7 +9,7 @@ import {
 import { Book } from './book.entity';
 export type statusState =
   | 'Pending'
-  | 'Checked-out'
+  | 'Checkedout'
   | 'Refused'
   | 'Accepted'
   | 'Damaged'
@@ -19,7 +19,7 @@ export type statusState =
   | 'Canceled';
 export enum status {
   Pending = 'Pending',
-  CheckedOut = 'Checked-out',
+  CheckedOut = 'Checkedout',
   Refused = 'Refused',
   Accepted = 'Accepted',
   Damaged = 'Damaged',
@@ -32,33 +32,23 @@ export enum status {
 export class UserToBook {
   @PrimaryGeneratedColumn()
   userToBookId: number;
-
   @CreateDateColumn()
   createdDate: Date;
-
   @Column()
   userId: number;
-
   @Column()
   bookId: number;
-
   @Column()
   startDate: Date;
   @Column()
   endDate: Date;
-
   @Column({ default: 'Pending' })
   status: statusState;
 
-  @Column({ default: 'user' })
-  receiverRole: string;
 
-  @Column({ default: false })
-  receiverSeen: boolean;
-
-  @ManyToOne(() => User, (user) => user.userToBooks)
+  @ManyToOne(() => User, (user) => user.userToBooks,{onDelete:'CASCADE'})
   user: User;
 
-  @ManyToOne(() => Book, (book) => book.userToBooks)
+  @ManyToOne(() => Book, (book) => book.userToBooks,{cascade:true})
   book: Book;
 }

@@ -1,0 +1,127 @@
+type User {
+  id: ID!
+  name: String!
+  lastName: String!
+  email: String!
+  active: Boolean!
+  admin: Boolean
+}
+type Book {
+  id: ID!
+  title: String!
+  numberOfPages: Int!
+  edition: String!
+  synopsis: String
+  year: Int
+  category: String!
+  quantity: Int!
+  coverPath: String
+  authors: [String!]!
+  embedding: [Float]
+}
+ 
+ input BookInput {
+  title: String!
+  numberOfPages: Int!
+  edition: String!
+  synopsis: String!
+  year: Int
+  category: String!
+  quantity: Int!
+  authors: [String!]!
+ }
+ input CreateUserInput {
+  email:String!
+  lastName:String!
+  name:String!
+ }
+
+ input UpdateBookInput{
+  title: String!
+  numberOfPages: Int!
+  edition: String!
+  year: Int
+  category: String!
+  quantity: Int!
+  authors: [String!]!
+ }
+ input BorrowInput{
+  idBook:ID!
+  startDate:String!
+  endDate:String!
+ }
+
+ enum Status{
+  Pending
+  Checkedout
+  Refused
+  Accepted
+  Damaged
+  Lost
+  Returned
+  Overdue
+  Canceled
+ }
+ 
+ input UpdateBorrowInput{
+  borrowId:ID!
+  status:Status!
+ }
+ input UpdateUserBorrowInput{
+  borrowId:ID!
+  startDate:String!
+  endDate:String!
+ }
+
+type UserToBook {
+  createdDate: String!
+  userToBookId: ID!
+  status: Status!
+  userId: ID!
+  userName: String!
+  userLastName: String!
+  email: String!
+  bookId: ID!
+  bookTitle: String!
+  endDate: String!
+  startDate: String!
+}
+
+type Recommendation {
+  role: String!
+  content: String!
+}
+type DeleteResult {
+  affected: Int
+}
+type UpdateResult{
+  affected:Int
+}
+
+type Query {
+  users: [User!]!
+  user(id: ID): User
+  books: [Book!]!
+  book(id: ID): Book
+  borrowList: [UserToBook]!
+  whoami: User
+  recommend(text: String!): Recommendation!
+}
+scalar Upload
+
+type Mutation {
+  signup(user:CreateUserInput!):User!
+  login(email: String!, password: String!): User
+  logout: Boolean
+  addBook(book:BookInput!,cover:Upload!):Book!
+  updateBook(id:ID!,book:UpdateBookInput!,cover:Upload):Book!
+  removeBook(id: String!): DeleteResult!
+  deleteUser(id:ID!):DeleteResult!
+  updateActivity(id:ID!,active:Boolean!):UpdateResult
+  updateUser(id:String,password:String!):User
+  borrow(borrowDetails:BorrowInput!):Book!
+  updateBorrow(borrowUpdate:UpdateBorrowInput!):UserToBook!
+  isReadyToBorrow(bookId:ID!):Book!
+  updateUserBorrow(borrowUpdate:UpdateUserBorrowInput!):UserToBook!
+  cancelUserBorrow(borrowId:ID!):UserToBook!
+}

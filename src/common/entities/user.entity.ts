@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Exclude, plainToClass } from 'class-transformer';
+import { Exclude } from 'class-transformer';
 import { UserToBook } from 'src/book/entities/userToBook';
+import { Notification } from 'src/notifications/entities/notification.entity';
 
 @Entity()
 export class User {
@@ -21,6 +22,12 @@ export class User {
   @Column({ default: false })
   admin: boolean;
 
-  @OneToMany(() => UserToBook, (userToBook) => userToBook.user)
+  @OneToMany(() => UserToBook, (userToBook) => userToBook.user,{cascade:true})
   userToBooks: UserToBook[];
+
+  @OneToMany(()=>Notification,(notif)=>notif.sender,{cascade:true})
+  sentNotification:Notification[]
+
+  @OneToMany(()=>Notification,(notif)=>notif.receiver,{cascade:true})
+  receivedNotifications:Notification[]
 }
