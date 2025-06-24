@@ -1,15 +1,17 @@
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { AuthService } from './auth.service';
 import { currentUser } from '../decorators/current-user/gql-current-user.decorator';
-import { User } from './entities/user.entity';
+import { User } from 'src/common/entities/user.entity';
 import { AuthGuard } from 'src/guards/gql-auth.guard';
 import { UseGuards } from '@nestjs/common';
-import { CreateUserDto } from './dtos/create-user.dto';
+import { CreateUserDto } from 'src/auth/dtos/create-user.dto';
 import { AdminAuthGuard } from 'src/guards/gql-admin.guard';
+import { AppService } from 'src/app.service';
+import { lastValueFrom } from 'rxjs';
+import { plainToInstance } from 'class-transformer';
 
 @Resolver()
 export class AuthResolver {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly appService: AppService) {}
 
   @Mutation(() => Boolean)
   async login(
@@ -18,31 +20,39 @@ export class AuthResolver {
     @Context() context,
   ) {
     const { req } = context;
-    const user = await this.authService.signin(email, password);
+    const user = await lastValueFrom(
+      this.appService.signin({ email, password }),
+    );
     if (!user) {
       return {};
     }
     req.session.userId = user.id;
-    return user;
+
+    // with plainToInstance used explicitly, there is no need to use classSerializeInterceptor
+    // returned result will automatically apply @exclude on password
+    const userInstance = plainToInstance(User, user);
+    return userInstance;
   }
-  
+
   @UseGuards(AdminAuthGuard)
   @Mutation('signup')
-  signup(@Args('user') user :CreateUserDto){
-    return this.authService.signup(user)
+  signup(@Args('user') user: CreateUserDto) {
+    return this.appService.signup(user);
   }
-  
+
   @UseGuards(AuthGuard)
   @Mutation(() => Boolean)
   async logout(@Context() context) {
-    const {req} = context;
+    const { req } = context;
     req.session.userId = null;
-    return true
+    return true;
   }
 
   @UseGuards(AuthGuard)
   @Query('whoami')
-  whoami(@currentUser() user: User) {
-    return user;
+  async whoami(@currentUser() user: User) {
+     const authUser = await lastValueFrom(this.appService.whoami(user));
+    const plainAuthUser = plainToInstance(User, authUser);
+    return plainAuthUser;
   }
 }

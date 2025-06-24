@@ -1,24 +1,7 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-  Query,
-  UseInterceptors,
-  UploadedFile,
-  ParseIntPipe,
-} from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { BookService } from './book.service';
-import { CreateBookDto } from './dto/create-book.dto';
-import { UpdateBookDto } from './dto/update-book.dto';
-import { AdminGuard } from 'src/guards/admin.guard';
-import { QueryBookDto } from './dto/query-book.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { BookRecommendService } from './book-recommend.service';
+import { MessagePattern } from '@nestjs/microservices';
 
 @Controller('book')
 export class BookController {
@@ -27,50 +10,38 @@ export class BookController {
     private readonly bookRecommendService: BookRecommendService,
   ) {}
 
-  @Get('recommend')
-  recommend(@Query('text') text: string) {
+  @MessagePattern({ cmd: 'recommend.books' })
+  recommend(text) {
     return this.bookRecommendService.recommend(text);
   }
 
-  @Get()
+  @MessagePattern({ cmd: 'all.books' })
   findAll() {
     return this.bookService.findAll();
   }
 
-  @UseGuards(AdminGuard)
-  @UseInterceptors(FileInterceptor('cover'))
-  @Post()
-  create(
-    @UploadedFile() cover: Express.Multer.File,
-    @Body() createBookDto: CreateBookDto,
-  ) {
+  @MessagePattern({ cmd: 'create.book' })
+  create({ createBookDto, cover }) {
     return this.bookService.create(createBookDto, cover);
   }
 
-  @Get('filter')
-  filterBooks(@Query() query: QueryBookDto) {
+  @MessagePattern({ cmd: 'filter.books' })
+  filterBooks(query) {
     return this.bookService.filter(query);
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  @MessagePattern({ cmd: 'find.book' })
+  findOne(id) {
     return this.bookService.findOne(id);
   }
 
-  @UseGuards(AdminGuard)
-  @UseInterceptors(FileInterceptor('cover'))
-  @Patch(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateBookDto: UpdateBookDto,
-    @UploadedFile() cover: Express.Multer.File,
-  ) {
+  @MessagePattern({ cmd: 'update.book' })
+  update({ id, updateBookDto, cover }) {
     return this.bookService.update(id, updateBookDto, cover);
   }
 
-  @UseGuards(AdminGuard)
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
+  @MessagePattern({ cmd: 'remove.book' })
+  remove(id) {
     return this.bookService.remove(id);
   }
 }

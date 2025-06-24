@@ -1,12 +1,14 @@
 import {
   MiddlewareConsumer,
   Module,
+  NestModule,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './user/entities/user.entity';
-import { BookModule } from './book/book.module';
+import { User } from './common/entities/user.entity';
+import { APP_PIPE } from '@nestjs/core';
 import { Book } from './book/entities/book.entity';
 import { UserToBook } from './book/entities/userToBook';
 import { CurrentUserMiddleware } from './middlewares/current-user/current-user.middleware';
@@ -17,14 +19,46 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver } from '@nestjs/apollo';
 import { Notification } from './notifications/entities/notification.entity';
-import { RedisModule } from './redis/redis.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { AppService } from './app.service';
+import { AppController } from './app.controller';
+import { BookModule } from './book/book.module';
+import { AuthModule } from './auth/auth.module';
+import { UserResolver } from './user/user.resolver';
+import { BookResolver } from './book/book.resolver';
+import { AuthResolver } from './user/auth.resolver';
 
 const cookieSession = require('cookie-session');
 
 @Module({
   imports: [
+    ClientsModule.register([
+      {
+        name: 'BOOK_SERVICE',
+        transport: Transport.TCP,
+        options: {
+          host: 'localhost',
+          port: 3001,
+        },
+      },
+    ]),
+    ClientsModule.register([
+      {
+        name: 'AUTH_SERVICE',
+        transport: Transport.TCP,
+        options: { host: 'localhost', port: 3002 },
+      },
+    ]),
+    ClientsModule.register([
+      {
+        name: 'USER_SERVICE',
+        transport: Transport.TCP,
+        options: { host: 'localhost', port: 3003 },
+      },
+    ]),
     UserModule,
     BookModule,
+    AuthModule,
     EventEmitterModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
@@ -61,8 +95,9 @@ const cookieSession = require('cookie-session');
     }),
     ScheduleModule.forRoot(),
     NotificationsModule,
-    RedisModule,
   ],
+  controllers: [AppController],
+  providers:[UserResolver,BookResolver,AuthResolver,AppService]
 })
 export class AppModule {
   constructor(private configService: ConfigService) {}

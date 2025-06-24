@@ -9,7 +9,7 @@ import { UserToBook, status as borrowStatus } from './entities/userToBook';
 import { Repository } from 'typeorm';
 import { Book } from './entities/book.entity';
 import { BorrowBookDto } from './dto/borrow-book.dto';
-import { User } from 'src/user/entities/user.entity';
+import { User } from 'src/common/entities/user.entity';
 import * as moment from 'moment';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -29,7 +29,6 @@ export class UserToBookService {
     @InjectRepository(Notification)
     private notificationRepository: Repository<Notification>,
     private notificationService: BorrowNotificationService,
-    private eventEmitter: EventEmitter2,
   ) {}
 
   async isBorrowed(userId: number, bookId: number) {
@@ -362,9 +361,7 @@ export class UserToBookService {
         },
       },
     });
-
-    return instanceToPlain(
-      userToBook
+  return userToBook
         .sort((a, b) => (a.createdDate <= b.createdDate ? 1 : -1))
         .map((userToBook) => ({
           createdDate: userToBook.createdDate,
@@ -378,7 +375,6 @@ export class UserToBookService {
           bookTitle: userToBook.book.title,
           endDate: userToBook.endDate,
           startDate: userToBook.startDate,
-        })),
-    );
+        }))
   }
 }

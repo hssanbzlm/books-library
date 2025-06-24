@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from './entities/book.entity';
 import { Repository, Like } from 'typeorm';
 import { QueryBookDto } from './dto/query-book.dto';
-import { CloudinaryService } from 'src/cloudinary/service/cloudinary/cloudinary.service';
+import { CloudinaryService } from 'src/book/cloudinary.service';
 import { BookRecommendService } from './book-recommend.service';
 import { FileUpload } from 'graphql-upload';
 
@@ -19,11 +19,11 @@ export class BookService {
 
   async create(
     createBookDto: CreateBookDto,
-    cover: FileUpload | Express.Multer.File,
+    cover:{buffer:string,filename:any,mimetype:any},
   ) {
     let uploadedFile = null;
     uploadedFile = await this.cloudinaryService.uploadStreamFile(
-      cover as FileUpload,
+      cover
     );
 
     createBookDto.coverPath = uploadedFile.secure_url;
@@ -53,7 +53,7 @@ export class BookService {
   async update(
     id: number,
     updateBookDto: UpdateBookDto,
-    cover: Express.Multer.File | FileUpload,
+    cover:{buffer:string,filename:any,mimetype:any},
   ) {
     const book = await this.bookRepo.findOneBy({ id });
     if (!book) throw new NotFoundException('This book does not exist');
