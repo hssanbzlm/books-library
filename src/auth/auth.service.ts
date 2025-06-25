@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../common/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -43,13 +43,13 @@ export class AuthService {
   }
   async signin(email: string, password: string) {
     const [user] = await this.repo.findBy({ email });
-    if (!user) throw new BadRequestException('Does not exist');
+    if (!user || !user?.active) throw new UnauthorizedException('Does not exist');
 
     const [salt, storedPassword] = user.password.split('.');
     const plainToHash = (await scrypt(password, salt, 32)) as Buffer;
 
     if (plainToHash.toString('hex') === storedPassword) return user;
-    throw new BadRequestException('Please, verify your credentials');
+    throw new UnauthorizedException('Please, verify your credentials');
   }
 
   userList() {

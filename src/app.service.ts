@@ -46,18 +46,22 @@ export class AppService {
     return this.bookClient.send({ cmd: 'find.book' }, data);
   }
   async update(data) {
-    const file = await data.cover;
-    const stream = file.file.createReadStream();
-    const chunks = [];
-    for await (const chunk of stream) {
-      chunks.push(chunk);
+    const file = await data?.cover;
+    let buffer;
+    if(file){
+      const stream = file.file.createReadStream();
+      const chunks = [];
+      for await (const chunk of stream) {
+        chunks.push(chunk);
+      }
+      buffer = Buffer.concat(chunks);
+
     }
-    const buffer = Buffer.concat(chunks);
     return this.bookClient.send(
       { cmd: 'update.book' },
       {
         ...data,
-        cover: {
+        cover: buffer && {
           buffer: buffer.toString('base64'),
           filename: file.filename,
           mimetype: file.mimetype,
