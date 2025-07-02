@@ -30,6 +30,7 @@ export class AuthService {
       name,
       lastName,
       password: resultPassword,
+      admin:true
     });
     const savedUser = await this.repo.save(createdUser);
     this.mailerService.sendMail({
