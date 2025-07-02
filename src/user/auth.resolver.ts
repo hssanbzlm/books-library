@@ -32,6 +32,7 @@ export class AuthResolver {
     return userInstance;
   }
 
+  @UseGuards(AdminAuthGuard)
   @Mutation('signup')
   signup(@Args('user') user: CreateUserDto) {
     return this.appService.signup(user);
