@@ -26,7 +26,7 @@ async function bootstrap() {
     options: { host: 'localhost', port: 3002 },
   });
   const userMicroservice = app.connectMicroservice({
-    tranport: Transport.TCP,
+    transport: Transport.TCP,
     options: { host: 'localhost', port: 3003 },
   });
   await app.startAllMicroservices();
