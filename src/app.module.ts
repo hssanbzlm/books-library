@@ -121,6 +121,7 @@ export class AppModule {
           keys: [this.configService.get('COOKIE_KEY')],
           sameSite:'none',
           secure:true,
+          httpOnly:true
         }),CurrentUserMiddleware
       )
       .forRoutes('*');
