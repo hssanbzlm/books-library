@@ -18,14 +18,16 @@ import { v2 as cloudinary } from 'cloudinary';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
-
 @Module({
   imports: [
     NotificationsModule,
     EventEmitterModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV}`,
+      envFilePath:
+        process.env.NODE_ENV !== 'production'
+          ? `.env.${process.env.NODE_ENV}`
+          : undefined,
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -51,7 +53,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
             };
       },
     }),
-    TypeOrmModule.forFeature([Book, User, UserToBook,Notification]),
+    TypeOrmModule.forFeature([Book, User, UserToBook, Notification]),
     HttpModule,
     MailerModule.forRootAsync({
       inject: [ConfigService],

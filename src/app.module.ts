@@ -62,7 +62,10 @@ const cookieSession = require('cookie-session');
     EventEmitterModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV}`,
+      envFilePath:
+        process.env.NODE_ENV !== 'production'
+          ? `.env.${process.env.NODE_ENV}`
+          : undefined,
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -115,16 +118,17 @@ const cookieSession = require('cookie-session');
 export class AppModule {
   constructor(private configService: ConfigService) {}
   configure(consumer: MiddlewareConsumer) {
+    console.log('cookie key ', this.configService.get('COOKIE_KEY'))
     consumer
       .apply(
         cookieSession({
           keys: [this.configService.get('COOKIE_KEY')],
-          sameSite:'none',
-          secure:true,
-          httpOnly:true
-        }),CurrentUserMiddleware
+          sameSite: 'none',
+          secure: true,
+          httpOnly: true,
+        }),
+        CurrentUserMiddleware,
       )
       .forRoutes('*');
-
   }
 }

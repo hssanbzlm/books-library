@@ -11,7 +11,10 @@ import { Notification } from '../notifications/entities/notification.entity';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV}`,
+      envFilePath:
+        process.env.NODE_ENV !== 'production'
+          ? `.env.${process.env.NODE_ENV}`
+          : undefined,
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
