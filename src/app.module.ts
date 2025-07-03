@@ -122,10 +122,9 @@ export class AppModule {
           sameSite: 'none',
           secure: process.env.NODE_ENV === 'production',
           httpOnly: true,
-        }),
+        }),CurrentUserMiddleware
       )
       .forRoutes('*');
 
-    consumer.apply(CurrentUserMiddleware).forRoutes('*');
   }
 }
