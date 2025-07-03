@@ -119,9 +119,8 @@ export class AppModule {
       .apply(
         cookieSession({
           keys: [this.configService.get('COOKIE_KEY')],
-          sameSite: 'none',
-          secure: process.env.NODE_ENV === 'production',
-          httpOnly: true,
+          sameSite:'none',
+          secure:true,
         }),CurrentUserMiddleware
       )
       .forRoutes('*');
