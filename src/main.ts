@@ -6,7 +6,7 @@ import { Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors({ credentials: true, origin: "https://books-library-front.vercel.app",allowedHeaders:"Content-Type,Accept,Authorization",methods:'POST' });
+  app.enableCors({ credentials: true, origin: "https://books-library-front.vercel.app",allowedHeaders:"Content-Type,Accept,Authorization,apollo-require-preflight",methods:'POST,OPTIONS' });
   app.use(graphqlUploadExpress({maxFileSize: 1000000, maxFiles: 1}))
   app.useGlobalPipes(new ValidationPipe({transform:true,whitelist:true}))
 
