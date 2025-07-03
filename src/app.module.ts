@@ -88,7 +88,7 @@ const cookieSession = require('cookie-session');
             };
       },
     }),
-    TypeOrmModule.forFeature([User, Book, UserToBook,Notification]),
+    TypeOrmModule.forFeature([User, Book, UserToBook, Notification]),
     GraphQLModule.forRoot({
       typePaths: ['./**/*.graphql'],
       driver: ApolloDriver,
@@ -110,13 +110,19 @@ const cookieSession = require('cookie-session');
     NotificationsModule,
   ],
   controllers: [AppController],
-  providers:[UserResolver,BookResolver,AuthResolver,AppService]
+  providers: [UserResolver, BookResolver, AuthResolver, AppService],
 })
 export class AppModule {
   constructor(private configService: ConfigService) {}
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(cookieSession({ keys: [this.configService.get('COOKIE_KEY')],sameSite:'none' }))
+      .apply(
+        cookieSession({
+          keys: [this.configService.get('COOKIE_KEY')],
+          sameSite: 'none',
+          secure: process.env.NODE_ENV === 'production',
+        }),
+      )
       .forRoutes('*');
 
     consumer.apply(CurrentUserMiddleware).forRoutes('*');
