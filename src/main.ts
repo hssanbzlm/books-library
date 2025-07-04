@@ -13,7 +13,7 @@ async function bootstrap() {
 
   app.enableCors({
     credentials: true,
-    origin: 'https://books-library-front.onrender.com',
+    origin: 'https://books-library-front.vercel.app',
   });
 
   app.use(graphqlUploadExpress({ maxFileSize: 1000000, maxFiles: 1 }));
