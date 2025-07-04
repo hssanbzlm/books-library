@@ -23,8 +23,10 @@ export class AuthResolver {
     const user = await lastValueFrom(
       this.appService.signin({ email, password }),
     );
+    console.log('Before:', req.session);
 
     req.session.userId = user.id;
+    console.log('After:', req.session);
 
     // with plainToInstance used explicitly, there is no need to use classSerializeInterceptor
     // returned result will automatically apply @exclude on password
