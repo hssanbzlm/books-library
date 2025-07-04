@@ -95,6 +95,7 @@ const cookieSession = require('cookie-session');
     GraphQLModule.forRoot({
       typePaths: ['./**/*.graphql'],
       driver: ApolloDriver,
+      context: ({ req, res }) => ({ req, res }),
     }),
     MailerModule.forRootAsync({
       inject: [ConfigService],
