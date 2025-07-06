@@ -1,0 +1,24 @@
+name: "prod deployment"
+on:
+  push:
+    branches: master
+jobs:
+   Deploy-Production:
+    runs-on: ubuntu-latest
+    steps: 
+        - name: checkout
+          uses: actions/checkout@v3
+
+        - name: Install deps 
+          uses: npm ci 
+
+        - name: build
+          run: npm run build
+        
+        - name: Deploy to render 
+          uses: JamesIves/render-deploy-action@v1
+          with: 
+            service-id: ${{ secrets.RENDER_SERVICE_ID }}
+            api-key: ${{ secrets.RENDER_API_KEY }}
+            path: dist
+
