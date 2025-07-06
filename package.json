@@ -23,7 +23,7 @@
     "test:e2e": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@apollo/sedrver": "^4.10.4",
+    "@apollo/server": "^4.10.4",
     "@nestjs-modules/mailer": "^1.11.2",
     "@nestjs/apollo": "^12.1.0",
     "@nestjs/axios": "^4.0.0",
